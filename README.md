@@ -1,4 +1,5 @@
 # BachelorThesisAutoML
 Graduate qualification work 2020
+
 TODO:
-*Code refactoring
+1. Code refactoring
