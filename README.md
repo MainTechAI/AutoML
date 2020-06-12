@@ -2,8 +2,9 @@
 Graduate qualification work 2020
 
 TODO:
-* code refactoring
-* bug fix
+* remove unused packages from requirements
+* refactor code
+* fix bugs
 * complete search spaces
 * redesign architecture
 * expand functionality
