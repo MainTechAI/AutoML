@@ -85,7 +85,7 @@ class ModelSeletionThread(QThread):
         #print(MS.__check_time()) 
         
         # публичный метод по этому можешь вызвать
-        #MS.fit(5) # может отсюда управлять?
+        #MS.fit(5) # можно отсюда управлять
         print("ModelSeletionThread finish")
         
         self.signal_model_selection_finish.emit()

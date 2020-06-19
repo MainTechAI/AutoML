@@ -115,7 +115,7 @@ class ModelSelection:
                 print(args['name'],args['param'])
                 
                 # every commented parametr worsen performans on G-credit
-                # better without them ?
+                # better without them 
                 if args['name']=='SVM':             
                     clf = args['model'](
                         kernel = args['param']['kernel'],
@@ -435,10 +435,31 @@ class ModelSelection:
 
 
     
+# %%   #################################################################   
+ 
     
     
-# %%   #################################################################     
     
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+# %% 
         
 from category_encoders import OrdinalEncoder
        
@@ -515,7 +536,8 @@ class DataPreprocessing:
         y=self.__label_col
         
         # x to numpy float x.astype(float)
-        return x,y
+        #.astype(float)
+        return x.astype(float),y
     
     
 # %%
@@ -532,4 +554,159 @@ class DataPreprocessing:
     
 # %%    
     
+    
+    
+    
+    
+    
+    
+    
+    
+    
+# %%
+        
+#from hyperopt import fmin, tpe, hp, STATUS_OK
+#
+#def objective(x):
+#    return {'loss': x ** 2, 'status': STATUS_OK }
+#
+#best = fmin(objective,
+#    space=hp.uniform('x', -10, 10),
+#    algo=tpe.suggest,
+#    max_evals=1000)
+#
+#print( best )
+
+
+
+
+#
+#from model_list import ClassificationModels
+#
+#model_list = ClassificationModels().get_approved_models()
+#print(model_list)
+#
+#
+#
+#import pickle
+#import time
+#from hyperopt import fmin, tpe, hp, STATUS_OK, Trials
+#
+#print(model_list[1])
+#
+##def objective(model_list[1].default_parameters):
+#    return {
+#        'loss': model_list[1].get_skl_estimator(),
+#        'status': STATUS_OK,
+#        # -- store other results like this
+#        'eval_time': time.time(),
+#        'other_stuff': {'type': None, 'value': [0, 1, 2]},
+#        # -- attachments are handled differently
+#        'attachments':
+#            {'time_module': pickle.dumps(time.time)}
+#        }
+#        
+#trials = Trials()
+#best = fmin(objective,
+#    space=hp.uniform('x', -10, 10),
+#    algo=tpe.suggest,
+#    max_evals=100,
+#    trials=trials)
+#
+#print(best)        
+    
+
+
+class MyClass:
+      def __init__(self, arg):
+          """Конструктор"""
+          self._arg = arg    # параметр объекта
+
+      def method1(self, x):
+          """метод, входящий в интерфейс класса"""
+
+      def _method2(self, x):
+          """метод, не входящий в интерфейс класса"""
+
+      def __method2(self, x):
+          """метод доступный только внутри класса. Private"""
+
+      @staticmethod
+      def method3(arg1, arg2 ):
+          """статический метод, доступный для вызова как из экземпляров класса, так и из самого класса"""
+
+      @classmethod
+      def method4(cls, arg1, arg2):
+          """метод класса, доступный для вызова как из экземпляров класса, 
+          так и из самого класса, с доступом к внутренним методам и параметрам"""
+          
+          
+      # The init method or constructor  
+      def __init__2(self, breed, color):  
+          
+          # Instance Variable      
+          self.breed = breed 
+          self.color = color
+
+
+
+
+#Открытые атрибуты 
+#Доступ к ним осуществляется напрямую без методов для чтения и записи
+#"""метод, входящий в интерфейс класса"""
+
+
+
+
+def foo(): # всё ок
+
+    import os
+    
+    dir_name='experiment2'
+    
+    work_path = os.getcwd() # current working dir
+    path = os.path.join(work_path, dir_name) 
+    print ("The current working directory is %s" % work_path)
+    
+    if(os.path.exists(path)==False):
+        os.mkdir(path)
+    else:
+        print('Directory already exist')
+    
+    
+    savedir = path
+    import os
+    filename = os.path.join(savedir, 'model.joblib')
+        
+    
+    from sklearn.datasets import load_breast_cancer
+    X, Y = load_breast_cancer(return_X_y=True)
+    
+    #from sklearn.gaussian_process import GaussianProcessClassifier
+    #to_persist=GaussianProcessClassifier()
+    
+    #from lightning.classification import AdaGradClassifier
+    #to_persist=AdaGradClassifier()
+    
+    from dbn import SupervisedDBNClassification
+    to_persist=SupervisedDBNClassification()
+     
+    
+    
+    to_persist.fit(X[:400],Y[:400])
+    
+    print(filename)
+    
+    import joblib
+    joblib.dump(to_persist, filename) 
+    
+    
+    # load from file
+    import joblib
+    clf = joblib.load(filename) 
+    
+    print(clf.score(X[400:],Y[400:]))
+
+
+
     

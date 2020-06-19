@@ -17,26 +17,26 @@ class ModelHolder:
             Ridge(),
             PassiveAggressive(),
             LogisticRegression(), 
-            LDA(),                    
-            QDA(),                    
-            LinearSVC(),              
-            SVM(),                    
+            LDA(),                    #+ ERROR
+            QDA(),                    #+ ERROR
+            LinearSVC(),              #+ часть по статье, часть auto-skl
+            SVM(),                    #+ pm1c, по статье
             SGD(),                 
-            KNeighbors(),             
+            KNeighbors(),             #+ pm1c по статье
             NearestCentroid(), 
             GaussianProcess(), 
             BernoulliNB(),
             GaussianNB(), 
             DecisionTree(), 
-            BaggingSVC(),            
-            RandomForest(),           
+            BaggingSVC(),             #+ по статье hundreds of clf
+            RandomForest(),           #+ pm1c, по статье
             xRandTrees(), 
-            AdaBoost(),               
-            HistGB(),                
-            LabelSpreading(),              
-            MLP(),                    
-            XGBoost(),               
-            ELM(),                  
+            AdaBoost(),               #+ pm1c, по статье
+            HistGB(),                 #+
+            LabelSpreading(),         #+         
+            MLP(),                    #+
+            XGBoost(),                #+ по статье
+            ELM(),                    #+
             
             DBN(),
             FactorizationMachine(),
