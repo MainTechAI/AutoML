@@ -14,102 +14,111 @@ class ModelSelection:
                  used_algorithms, metric, validation, saved_models_count,
                  iterations):
         
-        self.__DS=DS
-        self.__CD=CD
-        self.__experiment_name=experiment_name
-        self.__duration=duration
-        self.__min_accuracy=min_accuracy
-        self.__max_model_memory=max_model_memory
-        self.__max_prediction_time=max_prediction_time
-        self.__max_train_time=max_train_time
-        self.__iterations=iterations
+        ###!!!  DEV
         
-        self.__used_algorithms=used_algorithms
-        self.__metric=metric
-        self.__validation=validation
+        self.row_count = None                    
+        self.columns_count = None # all col (with target?)
+        self.target_column = None
+        self.cat_columns = []
         
-        self.__saved_models_count=saved_models_count
+        ###!!!  DEV
+        
+        self.DS=DS
+        self.CD=CD
+        self.experiment_name=experiment_name
+        self.duration=duration
+        self.min_accuracy=min_accuracy
+        self.max_model_memory=max_model_memory
+        self.max_prediction_time=max_prediction_time
+        self.max_train_time=max_train_time
+        self.iterations=iterations
+        
+        self.used_algorithms=used_algorithms
+        self.metric=metric
+        self.validation=validation
+        
+        self.saved_models_count=saved_models_count
                     
-        self.__time_end = perf_counter() + duration
+        self.time_end = perf_counter() + duration
         
         
         
-        self.__valtype=''       
-        self.__CV_jobs=1              
-        self.__cv_splits=None
+        self.valtype=''       
+        self.CV_jobs=1              
+        self.cv_splits=None
         
-        if(self.__validation in ["3 fold CV","5 fold CV","10 fold CV"]):
-            if(self.__validation=="3 fold CV"):
-                self.__cv_splits=3
-            elif(self.__validation=="5 fold CV"):
-                self.__cv_splits=5
-            elif(self.__validation=="10 fold CV"):
-                self.__cv_splits=10
-            self.__valtype='CV'
+        if(self.validation in ["3 fold CV","5 fold CV","10 fold CV"]):
+            if(self.validation=="3 fold CV"):
+                self.cv_splits=3
+            elif(self.validation=="5 fold CV"):
+                self.cv_splits=5
+            elif(self.validation=="10 fold CV"):
+                self.cv_splits=10
+            self.valtype='CV'
             from sklearn import model_selection
-            self.__kfold = model_selection.KFold(n_splits=self.__cv_splits)
+            self.kfold = model_selection.KFold(n_splits=self.cv_splits)
 
-        elif(self.__validation == "holdout"):
-            self.__valtype='H'
+        elif(self.validation == "holdout"):
+            self.valtype='H'
           
             
                    
         # DEBUG 
-        print(self.__DS)
-        print(type(self.__DS))
-        print(self.__DS.shape)
-        print(self.__DS[0])
-        print(type(self.__DS[0]))
+        print(self.DS)
+        print(type(self.DS))
+        print(self.DS.shape)
+        print(self.DS[0])
+        print(type(self.DS[0]))
         
         
         print('!start!')
-        preproc = DataPreprocessing(self.__DS,self.__CD)
-        self.__x, self.__y = preproc.get_x_y()
+        preproc = DataPreprocessing(self.DS,self.CD)
+        self.x, self.y = preproc.get_x_y()
         
-        self.__y_ELM = preproc.encode_y_ELM_binary(self.__y)
-        self.__x_ELM = self.__x.copy()
-        self.__x_ELM = self.__x_ELM.astype(np.float64)
+        self.y_ELM = preproc.encode_y_ELM_binary(self.y)
+        self.x_ELM = self.x.copy()
+        self.x_ELM = self.x_ELM.astype(np.float64)
        
-        self.__nrows, self.__ncol=self.__x.shape  
+        self.nrows, self.ncol=self.x.shape  
         
-        self.__models=ModelHolder().get_approved_models(self.__used_algorithms)
+        self.models=ModelHolder().get_approved_models(self.used_algorithms)
         
-        self.__search()
+        self.search()
         
         print('!end!')         
 
 # %%      
-    def __check_time(self):           
-        if( self.__time_end > perf_counter() ) :
+    def check_time(self):           
+        if( self.time_end > perf_counter() ) :
             return True
         else:
             return False           
         
 # %%    
     
-    def __search(self):     
+    def search(self):     
         from hyperopt import tpe, hp, fmin, STATUS_OK,Trials,STATUS_FAIL
         from sklearn.model_selection import train_test_split
         from sklearn.preprocessing import StandardScaler
         from sklearn.pipeline import make_pipeline
         from util import split_val_score, cross_val_score
                       
-        #print(self.__y)
-        #print(self.__y_ELM)
+        #print(self.y)
+        #print(self.y_ELM)
         
         # if validation == holdout
-        if(self.__valtype == 'H'):
-            self.__x_train, self.__x_test, self.__y_train, self.__y_test = \
-                                 train_test_split(self.__x,self.__y, test_size=0.2)
+        if(self.valtype == 'H'):
+            self.x_train, self.x_test, self.y_train, self.y_test = \
+                                 train_test_split(self.x,self.y, test_size=0.2)
             
-            if(self.__used_algorithms['ELM']==True):
-                self.__x_train_ELM, self.__x_test_ELM, self.__y_train_ELM, \
-                  self.__y_test_ELM = train_test_split(self.__x.astype(np.float64),
-                                                       self.__y_ELM, test_size=0.2)
+            if(self.used_algorithms['ELM']==True):
+                self.x_train_ELM, self.x_test_ELM, self.y_train_ELM, \
+                  self.y_test_ELM = train_test_split(self.x.astype(np.float64),
+                                                       self.y_ELM, test_size=0.2)
         
         #%% 
         def objective_func(args):          
-            if(self.__check_time()==True):                    
+            if(self.check_time()==True):                    
                 
                 #debug
                 print(args['name'],args['param'])
@@ -215,8 +224,8 @@ class ModelSelection:
                         reg_param = args['param']['reg_param'],
                         )                                 
                 
-                #TODO -1 1
-                elif args['name']=='ELM': 
+                elif args['name']=='ELM':
+                    #TODO -1 1
                     clf = args['model'](
                         hid_num = int(args['param']['hid_num']),
                         a =  args['param']['a'],
@@ -244,13 +253,13 @@ class ModelSelection:
                 
                 #%%
                                 
-                if( self.__valtype=='CV' ):                                    
+                if( self.valtype=='CV' ):                                    
                     start_timer = perf_counter()  
                      
                     if(args['name']=='ELM'):
                         #if ValueError                       
                         try:
-                            cv_results = cross_val_score(clf, self.__x_ELM, self.__y_ELM, cv=self.__kfold, scoring = self.__metric, n_jobs = self.__CV_jobs)
+                            cv_results = cross_val_score(clf, self.x_ELM, self.y_ELM, cv=self.kfold, scoring = self.metric, n_jobs = self.CV_jobs)
                         except :#ValueError
                             print("Oops! Error...") 
                             cv_results={}
@@ -258,20 +267,20 @@ class ModelSelection:
                             cv_results['inference_time'] = np.array([9999999999,9999999999])
                             cv_results['test_score']     = np.array([-9999999999,-9999999999])                       
                     else:
-                        cv_results = cross_val_score(clf, self.__x, self.__y, cv=self.__kfold, scoring = self.__metric, n_jobs = self.__CV_jobs)
+                        cv_results = cross_val_score(clf, self.x, self.y, cv=self.kfold, scoring = self.metric, n_jobs = self.CV_jobs)
                     
                     mem = cv_results['memory_fited'].max()
                     pred_time = cv_results['inference_time'].max()
                     accuracy = cv_results['test_score'].mean()                                  
                     time_all = perf_counter() - start_timer                   
                 #%%               
-                elif( self.__valtype == 'H' ):                                
+                elif( self.valtype == 'H' ):                                
                     start_timer = perf_counter()
                     
                     if(args['name']=='ELM'):
                         #TODO ValueError                       
                         try:
-                            results=split_val_score(clf, self.__x_train_ELM, self.__x_test_ELM, self.__y_train_ELM, self.__y_test_ELM, scoring=self.__metric  )
+                            results=split_val_score(clf, self.x_train_ELM, self.x_test_ELM, self.y_train_ELM, self.y_test_ELM, scoring=self.metric  )
                         except :#ValueError
                             print("Oops! Error...") 
                             results={}
@@ -279,7 +288,7 @@ class ModelSelection:
                             results['inference_time'] = 9999999999
                             results['test_score']     = -9999999999                                          
                     else:
-                        results=split_val_score(clf, self.__x_train, self.__x_test, self.__y_train, self.__y_test, scoring=self.__metric  )  
+                        results=split_val_score(clf, self.x_train, self.x_test, self.y_train, self.y_test, scoring=self.metric  )  
                     
                     pred_time = results['inference_time'] 
                     mem = results['memory_fited']  
@@ -288,7 +297,7 @@ class ModelSelection:
                 #%%               
                 loss=(-accuracy)
                 
-                if(self.__metric=='accuracy'):
+                if(self.metric=='accuracy'):
                     accuracy=accuracy*100
                 
                 # monitoring
@@ -296,10 +305,10 @@ class ModelSelection:
                 print('')
                 
                 # Model requirments check
-                if(accuracy < self.__min_accuracy or 
-                   mem > self.__max_model_memory or 
-                   pred_time > self.__max_prediction_time or
-                   time_all > self.__max_train_time):
+                if(accuracy < self.min_accuracy or 
+                   mem > self.max_model_memory or 
+                   pred_time > self.max_prediction_time or
+                   time_all > self.max_train_time):
                     status=STATUS_FAIL
                     loss=999
                 else:
@@ -332,7 +341,7 @@ class ModelSelection:
         # Prepairing to search      
         trials = Trials()      
         hyper_space_list=[]
-        for model in self.__models:
+        for model in self.models:
             hyper_space_list.append(model.search_space)
                             
         space = hp.choice('classifier',hyper_space_list)
@@ -342,14 +351,14 @@ class ModelSelection:
         import hyperopt        
         
         try:
-            fmin(objective_func, space, algo=tpe.suggest, max_evals=self.__iterations, trials=trials)
+            fmin(objective_func, space, algo=tpe.suggest, max_evals=self.iterations, trials=trials)
             self.status='OK'
         except hyperopt.exceptions.AllTrialsFailed:
             print('No solutions found. Try a different algorithm or change the requirements')
             self.status='No solutions found'
-        #except:
-        #    print('Unexpected error')
-        #    self.status='Unexpected error'
+        except:
+            print('Unexpected error')
+            self.status='Unexpected error'
             
         
         #%%    
@@ -368,17 +377,17 @@ class ModelSelection:
                 if( res['status']=='ok'):
                     results.append( (res['accuracy'],res['model'],res['model_name'],res['model_memory'],res['prediction_time'],res['train_time']) )     
             
-            self.__optimal_results = results
+            self.optimal_results = results
     
-            self.__save_n_best()                
+            self.save_n_best()                
     
 # %%    
             
-    def __save_n_best(self):
+    def save_n_best(self):
         
         def save_model(to_persist, name):
             import os   
-            dir_name=self.__experiment_name    
+            dir_name=self.experiment_name    
             work_path = os.getcwd()
             path = os.path.join(work_path, dir_name) 
             print('Save model: '+name)
@@ -396,37 +405,37 @@ class ModelSelection:
         
         
         # sort self.optimal_results by accuracy
-        self.__optimal_results.sort(key = sortSecond, reverse = True)         
+        self.optimal_results.sort(key = sortSecond, reverse = True)         
         
         
-        if(self.__saved_models_count == "Все"):
-            for i in range(len(self.__optimal_results)):
-                model=self.__optimal_results[i][1]
-                name=str(i+1)+'_'+str(self.__optimal_results[i][2])+'_'+str(self.__optimal_results[i][0])
+        if(self.saved_models_count == "Все"):
+            for i in range(len(self.optimal_results)):
+                model=self.optimal_results[i][1]
+                name=str(i+1)+'_'+str(self.optimal_results[i][2])+'_'+str(self.optimal_results[i][0])
                 save_model(model,name)
             
         else:
-            if(self.__saved_models_count == "Топ 5"):
+            if(self.saved_models_count == "Топ 5"):
                 model_num=5
-            elif(self.__saved_models_count == "Топ 10"):
+            elif(self.saved_models_count == "Топ 10"):
                 model_num=10
-            elif(self.__saved_models_count == "Лучшая"):
+            elif(self.saved_models_count == "Лучшая"):
                 model_num=1
-            elif(self.__saved_models_count == "Топ 25"):
+            elif(self.saved_models_count == "Топ 25"):
                 model_num=25
-            elif(self.__saved_models_count == "Топ 50"):
+            elif(self.saved_models_count == "Топ 50"):
                 model_num=50
                 
-            if(len(self.__optimal_results)<model_num):
-                model_num = len(self.__optimal_results)   
+            if(len(self.optimal_results)<model_num):
+                model_num = len(self.optimal_results)   
                         
             for i in range(model_num):
-                model=self.__optimal_results[i][1]
-                name=str(i+1)+'_'+str(self.__optimal_results[i][2])+'_'+str(self.__optimal_results[i][0])
+                model=self.optimal_results[i][1]
+                name=str(i+1)+'_'+str(self.optimal_results[i][2])+'_'+str(self.optimal_results[i][0])
                 save_model(model,name)
         
         self.results_excel.sort_values(by='accuracy', ascending=False,inplace=True)
-        self.results_excel.to_excel(self.__experiment_name+"\\model_selection_results.xlsx")
+        self.results_excel.to_excel(self.experiment_name+"\\model_selection_results.xlsx")
         #TODO save all experiment settings in JSON?
         
 #['accuracy']['model']['model_name']['model_memory']['prediction_time']['train_time'] 
@@ -468,49 +477,49 @@ class DataPreprocessing:
     
     def __init__(self, DS, CD):
         
-        self.__DS = DS.copy()
-        self.__CD = CD.copy()
+        self.DS = DS.copy()
+        self.CD = CD.copy()
         
         # заменил на очистку при загрузке
         # не работает при category
-        # self.__handle_missing()
-        self.__col_grouping()       
+        # self.handle_missing()
+        self.col_grouping()       
         
 # %%
         
-    def __handle_missing(self): # remove row with at least 1 missing value
-        self.__DS=self.__DS[np.all(np.isfinite(self.__DS), axis=1)] 
+    def handle_missing(self): # remove row with at least 1 missing value
+        self.DS=self.DS[np.all(np.isfinite(self.DS), axis=1)] 
         
 # %%         
 
-    def __col_grouping(self):
+    def col_grouping(self):
         
-        self.__num_index = []
-        self.__categ_index = []
-        self.__label_index = None
+        self.num_index = []
+        self.categ_index = []
+        self.label_index = None
         
-        for column in self.__CD:
+        for column in self.CD:
             if(column[1]=='Num'):
-                self.__num_index.append(column[0]-1)
+                self.num_index.append(column[0]-1)
             elif(column[1]=='Categ'):
-                self.__categ_index.append(column[0]-1)  
+                self.categ_index.append(column[0]-1)  
             elif(column[1]=='Label'):
-                self.__label_index = column[0]-1 
+                self.label_index = column[0]-1 
                 
-        self.__num_col   = self.__DS[:,self.__num_index]
-        self.__categ_col = self.__DS[:,self.__categ_index]
-        self.__label_col = self.__DS[:,self.__label_index]
+        self.num_col   = self.DS[:,self.num_index]
+        self.categ_col = self.DS[:,self.categ_index]
+        self.label_col = self.DS[:,self.label_index]
         
 # %%     
     
-    def __encode_cat_col(self):
+    def encode_cat_col(self):
         
-        enc = OrdinalEncoder(return_df=False).fit(self.__categ_col)
-        self.__categ_col = enc.transform(self.__categ_col) 
+        enc = OrdinalEncoder(return_df=False).fit(self.categ_col)
+        self.categ_col = enc.transform(self.categ_col) 
         
         # DEBUG
-        print(self.__DS)
-        print(self.__categ_col)
+        print(self.DS)
+        print(self.categ_col)
         # return pandas, IDK why
         # 1TODO pandas to numpy        
      
@@ -518,22 +527,22 @@ class DataPreprocessing:
         
     def get_x_y(self):
         # if cat col exist encode
-        if(len(self.__categ_index)!=0 ):
+        if(len(self.categ_index)!=0 ):
             
-            self.__encode_cat_col()
+            self.encode_cat_col()
             
-            if(len(self.__num_index)!=0 ):
+            if(len(self.num_index)!=0 ):
                 print('has Num, has Categ')
-                x = np.hstack([self.__num_col,self.__categ_col])
+                x = np.hstack([self.num_col,self.categ_col])
             else:
                 print('no Num, has Categ')
-                x=self.__categ_col
+                x=self.categ_col
             
         else:
             print('no Categ, has Num')
-            x=self.__num_col
+            x=self.num_col
             
-        y=self.__label_col
+        y=self.label_col
         
         # x to numpy float x.astype(float)
         #.astype(float)
@@ -617,43 +626,7 @@ class DataPreprocessing:
     
 
 
-class MyClass:
-      def __init__(self, arg):
-          """Конструктор"""
-          self._arg = arg    # параметр объекта
 
-      def method1(self, x):
-          """метод, входящий в интерфейс класса"""
-
-      def _method2(self, x):
-          """метод, не входящий в интерфейс класса"""
-
-      def __method2(self, x):
-          """метод доступный только внутри класса. Private"""
-
-      @staticmethod
-      def method3(arg1, arg2 ):
-          """статический метод, доступный для вызова как из экземпляров класса, так и из самого класса"""
-
-      @classmethod
-      def method4(cls, arg1, arg2):
-          """метод класса, доступный для вызова как из экземпляров класса, 
-          так и из самого класса, с доступом к внутренним методам и параметрам"""
-          
-          
-      # The init method or constructor  
-      def __init__2(self, breed, color):  
-          
-          # Instance Variable      
-          self.breed = breed 
-          self.color = color
-
-
-
-
-#Открытые атрибуты 
-#Доступ к ним осуществляется напрямую без методов для чтения и записи
-#"""метод, входящий в интерфейс класса"""
 
 
 
