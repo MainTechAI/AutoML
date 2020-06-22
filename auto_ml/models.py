@@ -74,12 +74,10 @@ class ModelHolder:
             models.append((m.short_name, m.get_skl_estimator()))
                
         return models
-
        
 # %%  
 
-#   Переделанные модели
-        
+#   Переделанные модели     
 from hyperopt import hp
 
 # %%      
@@ -89,8 +87,7 @@ from hyperopt import hp
 from sklearn import svm
 
 class SVM:
-    
-            
+              
     def __init__(self, ):
         
         self.description="""
@@ -109,25 +106,21 @@ class SVM:
         
         For both types of SVMs, the best performance can typically be achieved 
           with low values of the gamma hyperparameter.
-          
-          
+                  
         # статья №2
         
         In svm the biggest gain in performance can be achieved by tuning the 
-        kernel, gamma or degree and С
-        
+        kernel, gamma or degree and С      
         
         Стратегия для HPO
         Начальный параметр C=1 шаг 10 в степени +-1, увеличивается скор, 
         значит идём куда надо, находим лучшее значение. Тоже и для gamma=0.0001
         Далее фиксируем одно из максимальных значений и изменяем второе, находим
         тем самым макимум, повторяем для второго значения. 
-        Выбираем по итогу пару с большим скором        
-        
+        Выбираем по итогу пару с большим скором              
         """     
         
         # for kernel=’linear’ use LinearSVC
-        #
 
         self.name = 'Support Vector Classification'
         self.short_name = 'SVM' 
@@ -238,7 +231,7 @@ class XGBoost:
 
         self.search_space = {
         'name':'XGBoost',
-        #'scale':hp.choice('XGBoost_scale_1',[True,False]), не нужно
+        'scale':None, #hp.choice('XGBoost_scale_1',[True,False]), не нужно
         'model':xgboost.XGBClassifier,
         'param':{
                 #"n_estimators":hp.randint('XGBoost_p1', 500), # было 5000  
@@ -256,14 +249,11 @@ class XGBoost:
 
     def get_skl_estimator(self, **default_parameters):
         return xgboost.XGBClassifier(**default_parameters)
-    
 
 # %%
 """
 
 add INFO ABOUT DATASET like number of row, features etc
-
-
 
 example how to define search space by hyperopt
 
@@ -279,7 +269,6 @@ sgd_alpha = hp.loguniform(’alpha’, low=np.log(1e-5), high=np.log(1) )
  https://github.com/dmlc/xgboost/blob/master/demo/guide-python/generalized_linear_model.py
 
 """
-
 
 # %%
 
@@ -322,7 +311,6 @@ from sklearn import linear_model
 
 # %% 
 
-
 class Perceptron:          
     def __init__(self, ):
         
@@ -352,9 +340,6 @@ class Perceptron:
 
     def get_skl_estimator(self, **default_parameters):
         return linear_model.Perceptron(**default_parameters)
-
-
-
 
 # %%
         
@@ -1116,17 +1101,15 @@ class xRandTrees:
         'name':'xRandTrees',
         'model':ensemble.ExtraTreesClassifier,
         'param':{
-            'max_features': hp.uniform('RandomForest_p1', 0.1, 0.9 ),
-            'min_samples_leaf':  1+hp.randint('RandomForest_p2', 20),
-            'bootstrap': hp.choice('RandomForest_p3', [True,False])
+            'max_features': hp.uniform('xRandTrees_p1', 0.1, 0.9 ),
+            'min_samples_leaf':  1+hp.randint('xRandTrees_p2', 20),
+            'bootstrap': hp.choice('xRandTrees_p3', [True,False])
             }
         }
-        
         
 
     def get_skl_estimator(self, **default_parameters):
         return ensemble.ExtraTreesClassifier(**default_parameters)
-
   
 # %% 
 
@@ -1189,7 +1172,6 @@ class AdaBoost:
 
 # %% 
 from sklearn.experimental import enable_hist_gradient_boosting
-
 
 
 class HistGB:          
@@ -1287,7 +1269,6 @@ class LabelSpreading:
 
     def get_skl_estimator(self, **default_parameters):
         return semi_supervised.LabelSpreading(**default_parameters)
-
   
 # %%  
         
@@ -1356,7 +1337,6 @@ import dbn
 
 class DBN:          
     def __init__(self, ):
-        
 
         """
         heavy       
@@ -1440,7 +1420,7 @@ class FactorizationMachine:
         
 # %%  
 
-class PolynomialNetwork:          
+class PolynomialNetwork:       
     def __init__(self, ):
         
         """
@@ -1525,7 +1505,6 @@ class ELM:
         
 """       
 from sklearn import dummy 
- 
 
 class DummyClassifier:          
     def __init__(self, ):
@@ -1551,6 +1530,5 @@ class DummyClassifier:
 
     def get_skl_estimator(self, **default_parameters):
         return dummy.DummyClassifier(**default_parameters)
-
 
 """

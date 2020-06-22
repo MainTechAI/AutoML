@@ -20,6 +20,7 @@ class ModelSelection:
         self.columns_count = None # all col (with target?)
         self.target_column = None
         self.cat_columns = []
+        self.path_to_save = None
         
         ###!!!  DEV
         
@@ -101,7 +102,7 @@ class ModelSelection:
         from sklearn.model_selection import train_test_split
         from sklearn.preprocessing import StandardScaler
         from sklearn.pipeline import make_pipeline
-        from util import split_val_score, cross_val_score
+        from utility.util import split_val_score, cross_val_score
                       
         #print(self.y)
         #print(self.y_ELM)
@@ -243,9 +244,7 @@ class ModelSelection:
                         )                  
                     if(args['scale']==True):                
                         clf = make_pipeline(StandardScaler(), clf)
-                
-
-                
+                               
                                                   
                 else:
                     clf = args['model']()
@@ -345,8 +344,7 @@ class ModelSelection:
             hyper_space_list.append(model.search_space)
                             
         space = hp.choice('classifier',hyper_space_list)
-        
-        
+              
         # Start search
         import hyperopt        
         
@@ -356,10 +354,9 @@ class ModelSelection:
         except hyperopt.exceptions.AllTrialsFailed:
             print('No solutions found. Try a different algorithm or change the requirements')
             self.status='No solutions found'
-        except:
-            print('Unexpected error')
-            self.status='Unexpected error'
-            
+        #except:
+        #    print('Unexpected error')
+        #    self.status='Unexpected error'        
         
         #%%    
         if(self.status=='OK'):
@@ -379,11 +376,11 @@ class ModelSelection:
             
             self.optimal_results = results
     
-            self.save_n_best()                
+            self.save_n_best_on_disk()                
     
 # %%    
             
-    def save_n_best(self):
+    def save_n_best_on_disk(self):
         
         def save_model(to_persist, name):
             import os   
@@ -440,9 +437,6 @@ class ModelSelection:
         
 #['accuracy']['model']['model_name']['model_memory']['prediction_time']['train_time'] 
    
-
-
-
     
 # %%   #################################################################   
  
@@ -460,11 +454,7 @@ class ModelSelection:
     
     
     
-    
-    
-    
-    
-    
+ 
     
     
 
@@ -485,10 +475,6 @@ class DataPreprocessing:
         # self.handle_missing()
         self.col_grouping()       
         
-# %%
-        
-    def handle_missing(self): # remove row with at least 1 missing value
-        self.DS=self.DS[np.all(np.isfinite(self.DS), axis=1)] 
         
 # %%         
 
@@ -572,63 +558,12 @@ class DataPreprocessing:
     
     
     
+
+
+
+
+
 # %%
-        
-#from hyperopt import fmin, tpe, hp, STATUS_OK
-#
-#def objective(x):
-#    return {'loss': x ** 2, 'status': STATUS_OK }
-#
-#best = fmin(objective,
-#    space=hp.uniform('x', -10, 10),
-#    algo=tpe.suggest,
-#    max_evals=1000)
-#
-#print( best )
-
-
-
-
-#
-#from model_list import ClassificationModels
-#
-#model_list = ClassificationModels().get_approved_models()
-#print(model_list)
-#
-#
-#
-#import pickle
-#import time
-#from hyperopt import fmin, tpe, hp, STATUS_OK, Trials
-#
-#print(model_list[1])
-#
-##def objective(model_list[1].default_parameters):
-#    return {
-#        'loss': model_list[1].get_skl_estimator(),
-#        'status': STATUS_OK,
-#        # -- store other results like this
-#        'eval_time': time.time(),
-#        'other_stuff': {'type': None, 'value': [0, 1, 2]},
-#        # -- attachments are handled differently
-#        'attachments':
-#            {'time_module': pickle.dumps(time.time)}
-#        }
-#        
-#trials = Trials()
-#best = fmin(objective,
-#    space=hp.uniform('x', -10, 10),
-#    algo=tpe.suggest,
-#    max_evals=100,
-#    trials=trials)
-#
-#print(best)        
-    
-
-
-
-
-
 
 
 def foo(): # всё ок
