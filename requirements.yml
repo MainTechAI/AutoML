@@ -14,11 +14,11 @@ dependencies:
   - babel=2.7.0=py_0
   - backcall=0.1.0=py36_0
   - blas=1.0=mkl
-  - bleach=3.1.0=py36_0
+  - bleach=3.1.4=pyh9f0ad1d_0
   - bokeh=1.4.0=py36_0
-  - ca-certificates=2020.4.5.1=hecc5488_0
+  - ca-certificates=2020.6.20=hecda079_0
   - category_encoders=2.1.0=py_0
-  - certifi=2020.4.5.1=py36h9f0ad1d_0
+  - certifi=2020.6.20=py36h9f0ad1d_0
   - cffi=1.12.3=py36h7a1dbc1_0
   - chardet=3.0.4=py36_1
   - click=7.0=py_0
@@ -119,7 +119,7 @@ dependencies:
   - prometheus_client=0.7.1=py_0
   - prompt_toolkit=2.0.9=py36_0
   - protobuf=3.8.0=py36h33f27b4_0
-  - psutil=5.6.3=py36he774522_0
+  - psutil=5.6.7=py36hfa6e2cd_0
   - py-xgboost=0.90=py36_1
   - pyaml=19.4.1=py_0
   - pycodestyle=2.5.0=py36_0
