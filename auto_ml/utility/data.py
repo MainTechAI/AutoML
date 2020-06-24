@@ -15,26 +15,26 @@ import os
 
 np.random.seed(0)
 
-# %%
-
-# Load DataSet from disc as pandas DataFrame  
+# %%  Load DataSet from disc as pandas DataFrame  
+ 
 def load_DS_as_df(path): 
+    #path = str(Path(path))  
     if os.path.isfile(path):
         DS = pd.read_csv(path, skiprows=0)#.dropna(how='any').as_matrix() #TODO change .as_matrix() to .values
         return DS
     
-# %%
+# %%  Load Column Description from disc as list
         
-# Load Column Description from disc as list
 def load_CD_as_list(path):
+    #path = str(Path(path)) 
     if os.path.isfile(path):         
         numpy_cd = np.genfromtxt(path, delimiter=',', dtype=None, encoding=None)  
         CD = numpy_cd.tolist()
         return CD
     
-# %%
+# %%  TODO? or not
 
-def load_DS_as_np(path): # TODO? or not    
+def load_DS_as_np(path):    
     #self.DS = np.genfromtxt(path, delimiter=',')   # ,dtype=None, encoding=None 
     pass
 
@@ -132,6 +132,10 @@ def load_X_y_CD(ds_abs_path, ds_type, cd_abs_path, cd_type, lib='numpy'):
     
     elif(lib=='pandas'):
         print('pandas not supported')   
+
+
+
+
 
 # %%
     

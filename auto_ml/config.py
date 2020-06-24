@@ -6,30 +6,36 @@ Created on Mon May 11 21:33:43 2020
 """
 
 # %%
-from pathlib import Path
 
+from pathlib import Path
 import json
 import os.path
+
 config_name = 'config.json'
 
-default_config = {   # Only English or Unicode allowed for strings
+# destination:
+# *containing default values
+# *saving different configs
+
+default_config = {   
+                    # Only English or Unicode allowed for strings
                     'task':'classification',
                     
                     'experiment_name':'experiment_1',
                     
                     'model_requirements':
                         {  
-                            'min_accuracy':65,                 
-                            'max_memory':1048576, # bytes
+                            'min_accuracy':65,             # %               
+                            'max_memory':1048576,          # bytes
                             'max_single_predict_time':40,  # ms                      
-                            'max_train_time (sec)':100,
+                            'max_train_time':100,          # sec
                         },
                             
                     'search_space':
                         {
                             'AdaBoost':True, 
                             'XGBoost':True, 
-                            'Bagging(SVС)':True,        
+                            'Bagging(SVC)':True,        
                             'MLP':True, 
                             'HistGB':False, 
                             'Ridge':False,       
@@ -42,7 +48,7 @@ default_config = {   # Only English or Unicode allowed for strings
                             'SVM':True, 
                             'RandomForest':True, 
                             'xRandTrees':True,     
-                            'ELM':True, 
+                            'ELM':False, 
                             'DecisionTree':False, 
                             'SGD':False, 
                             'KNeighbors':False, 
@@ -59,13 +65,20 @@ default_config = {   # Only English or Unicode allowed for strings
                     'search_options':
                         {
                             'duration':240, # sec
-                            'iterations':100, # number of optimizer iterations
+                            'iterations':100, # optimizer iterations
                             'metric':'accuracy',
-                            'validation':{
-                                'type':'CV', # 'CV' or 'holdout'
-                                'value':10,  # 10 CV or 70 holdout
-                                         },
-                            'saved_top_models_amount':1, # number or 'all'
+                            
+                            'validation':'10 fold CV', 
+                            # TODO change ModelSelection API
+                            #'validation': 
+                            #    {
+                            #        'type':'CV', # 'CV' or 'holdout'
+                            #        'value':10,  # 10 CV or 70 holdout
+                            #    },
+                            
+                            'saved_top_models_amount':'Все', # to English
+                            # TODO change ModelSelection API
+                            #'saved_top_models_amount':1, # number or 'all' 
                         },
                      
                     'paths':
@@ -82,7 +95,7 @@ default_config = {   # Only English or Unicode allowed for strings
                             'CD_name':None,
                             'CD_type':None, # csv
                             
-                            'target_column':None, #[1,4]  так бывает, ммм?
+                            'target_column':None, #[1,4]  ?
                             'categ_columns':None,
                             'text_columns':None,
                             'num_columns':None,

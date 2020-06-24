@@ -6,16 +6,19 @@ from PyQt5.QtWidgets import QMainWindow, QFileDialog
 import os
 from os.path import expanduser
 import sys
-import numpy
 
 from utility.dialog import Ui_Dialog, Ui_WarningPaths, Ui_WarningName, Ui_WarningModels
+from utility.data import load_DS_as_df, load_CD_as_list
+import config
+
+# TODO load initial GUI values from config.json
+
 
 """
 from .ui to .py  
 pyuic5 -o pyfilename.py design.ui
  -x executable  if __name__ == "__main__":
 """
-
 
 # %%
 import time
@@ -29,19 +32,16 @@ class TimerThread(QThread):
     @pyqtSlot(int)
     def slot_timer_start(self,value):
         self.seconds=value
-#        print("Start value:",value)   
+        print("Start value:",value)   
     
     def run(self): 
         count = self.seconds
         while count > 0:
             time.sleep(1)
             count -= 1
-#            print("seconds remaining",count)
+            #print("seconds remaining",count)
             self.signal_timer.emit(count)
-        self.signal_timer_finish.emit()
-        
-# %%
-        
+        self.signal_timer_finish.emit()       
         
         
 # %%
@@ -51,43 +51,35 @@ import auto
 class ModelSeletionThread(QThread):
     
     signal_model_selection_finish = pyqtSignal()       
-       
-    @pyqtSlot(numpy.ndarray,list,str,int,float,int,int,int,dict,str,str,str,int) #!!!
-    def slot_start_model_selection_(self,DS,CD,experiment_name,duration,
-                                    min_accuracy,max_model_memory,
-                                    max_prediction_time,max_train_time,
-                                    used_algorithms,metric,validation,
-                                    saved_models_count,iterations):
-        self.DS=DS
-        self.CD=CD
-        self.experiment_name=experiment_name
-        self.duration=duration
-        self.min_accuracy=min_accuracy
-        self.max_model_memory=max_model_memory
-        self.max_prediction_time=max_prediction_time
-        self.max_train_time=max_train_time
-        self.used_algorithms=used_algorithms
-        self.metric=metric
-        self.validation=validation 
-        self.saved_models_count=saved_models_count
-        self.iterations=iterations
-
-    
+      
     def run(self): 
+        
+        cfg=config.load_config()
+        
+        DS_path = cfg['paths']['DS_abs_path']
+        CD_path = cfg['paths']['CD_abs_path']            
+        
         # MS=
-        auto.ModelSelection(self.DS, self.CD, self.experiment_name, 
-                self.duration, self.min_accuracy, self.max_model_memory, 
-                self.max_prediction_time, self.max_train_time, 
-                self.used_algorithms, self.metric, self.validation, 
-                self.saved_models_count,self.iterations)
-        
-        # private по этому не сможешь вызвать
-        #print(MS.__check_time()) 
-        
+        auto.ModelSelection(
+                load_DS_as_df(DS_path).values, #!!! load as df then to numpy
+                load_CD_as_list(CD_path), 
+                cfg['experiment_name'],
+                cfg['search_options']['duration'],
+                cfg['model_requirements']['min_accuracy'],
+                cfg['model_requirements']['max_memory'],
+                cfg['model_requirements']['max_single_predict_time'],
+                cfg['model_requirements']['max_train_time'],
+                cfg['search_space'],
+                cfg['search_options']['metric'],
+                cfg['search_options']['validation'], # TODO change API
+                cfg['search_options']['saved_top_models_amount'], # TODO change API
+                cfg['search_options']['iterations']
+                            )
+                
         # публичный метод по этому можешь вызвать
         #MS.fit(5) # можно отсюда управлять
-        print("ModelSeletionThread finish")
         
+        print("ModelSeletionThread finish")     
         self.signal_model_selection_finish.emit()
         
 
@@ -97,42 +89,9 @@ class ModelSeletionThread(QThread):
 # %%
 class Ui_MainWindow(QMainWindow):
     signal_start_timer = pyqtSignal(int)
-    signal_start_MS = pyqtSignal(
-            numpy.ndarray,list,str,int,float,int,int,int,dict,str,str,str,int)#!!!
     
     def __init__(self):   
-        super(Ui_MainWindow, self).__init__()
-        
-        self.experiment_name = 'experiment_1'
-        self.duration = 240
-        self.min_accuracy = 65.0
-        self.max_model_memory = 1048576
-        self.max_prediction_time = 40 
-        self.max_train_time = 30
-        self.iterations=100
-        
-        self.dataset_path = None
-        self.column_description_path = None
-        
-        self.used_algorithms = {
-        'AdaBoost':True, 'XGBoost':True, 'Bagging(SVС)':True,
-        'MLP':True, 'HistGB':False, 'Ridge':False,
-        'LinearSVC':False, 'PassiveAggressive':False, 'LogisticRegression':False,
-        'LDA':False, 'QDA':False, 'Perceptron':False,      
-        'SVM':True, 'RandomForest':True, 'xRandTrees':True,
-        'ELM':True, 'DecisionTree':False, 'SGD':False,
-        'KNeighbors':False, 'NearestCentroid':False, 'GaussianProcess':False,
-        'LabelSpreading':False, 'BernoulliNB':False, 'GaussianNB':False,
-        'DBN':False, 'FactorizationMachine':False, 'PolynomialNetwork':False
-        }
-              
-        
-        self.metric='accuracy'
-        self.validation='3 fold CV'
-        self.saved_models_count='Топ 5'
-        
-        self.DS = None
-        self.CD = None
+        super(Ui_MainWindow, self).__init__()      
         
         self.lcd_bool = True
         
@@ -147,6 +106,8 @@ class Ui_MainWindow(QMainWindow):
        
     
     def setupUi(self):
+        cfg = config.load_config()
+        
         self.setObjectName("MainWindow")
         self.setEnabled(True)
         self.resize(320, 480)
@@ -200,7 +161,7 @@ class Ui_MainWindow(QMainWindow):
         self.spinBox_all_time.setMaximum(100000000)
         self.spinBox_all_time.setSingleStep(100)
 #        self.spinBox_all_time.setStepType(QtWidgets.QAbstractSpinBox.AdaptiveDecimalStepType)
-        self.spinBox_all_time.setProperty("value", 240)
+        self.spinBox_all_time.setProperty("value", cfg['search_options']['duration']) 
         self.spinBox_all_time.setObjectName("spinBox_all_time")
         self.label_5 = QtWidgets.QLabel(self.new_experiment)
         self.label_5.setGeometry(QtCore.QRect(20, 170, 170, 30))
@@ -214,7 +175,7 @@ class Ui_MainWindow(QMainWindow):
         self.spinBox_model_max_memory.setMaximum(100000000)
         self.spinBox_model_max_memory.setSingleStep(100)
 #        self.spinBox_model_max_memory.setStepType(QtWidgets.QAbstractSpinBox.AdaptiveDecimalStepType)
-        self.spinBox_model_max_memory.setProperty("value", 1048576)
+        self.spinBox_model_max_memory.setProperty("value", cfg['model_requirements']['max_memory'])
         self.spinBox_model_max_memory.setObjectName("spinBox_model_max_memory")
         self.lineEdit_experiment_name = QtWidgets.QLineEdit(self.new_experiment)
         self.lineEdit_experiment_name.setGeometry(QtCore.QRect(20, 50, 261, 21))
@@ -232,7 +193,7 @@ class Ui_MainWindow(QMainWindow):
         self.spinBox_max_predict_time.setMaximum(100000000)
         self.spinBox_max_predict_time.setSingleStep(100)
 #        self.spinBox_max_predict_time.setStepType(QtWidgets.QAbstractSpinBox.AdaptiveDecimalStepType)
-        self.spinBox_max_predict_time.setProperty("value", 40)
+        self.spinBox_max_predict_time.setProperty("value", cfg['model_requirements']['max_single_predict_time'])
         self.spinBox_max_predict_time.setObjectName("spinBox_max_predict_time")
         self.label_6 = QtWidgets.QLabel(self.new_experiment)
         self.label_6.setGeometry(QtCore.QRect(20, 210, 170, 30))
@@ -290,7 +251,7 @@ class Ui_MainWindow(QMainWindow):
         self.spinBox_min_accuracy.setMaximum(100)
         self.spinBox_min_accuracy.setSingleStep(1)
 #        self.spinBox_min_accuracy.setStepType(QtWidgets.QAbstractSpinBox.DefaultStepType)
-        self.spinBox_min_accuracy.setProperty("value", 65)
+        self.spinBox_min_accuracy.setProperty("value", cfg['model_requirements']['min_accuracy'])
 #        self.spinBox_min_accuracy.setDisplayIntegerBase(10)
         self.spinBox_min_accuracy.setObjectName("spinBox_min_accuracy")
         
@@ -306,7 +267,7 @@ class Ui_MainWindow(QMainWindow):
         self.spinBox_all_time_2.setMaximum(100000000)
         self.spinBox_all_time_2.setSingleStep(100)
 #        self.spinBox_all_time_2.setStepType(QtWidgets.QAbstractSpinBox.AdaptiveDecimalStepType)
-        self.spinBox_all_time_2.setProperty("value", 30)
+        self.spinBox_all_time_2.setProperty("value", cfg['model_requirements']['max_train_time'])
         self.spinBox_all_time_2.setObjectName("spinBox_all_time_2")
         
         #######!!!
@@ -321,7 +282,7 @@ class Ui_MainWindow(QMainWindow):
         self.spinBox_iter.setMinimum(1)
         self.spinBox_iter.setMaximum(100000000)
         self.spinBox_iter.setSingleStep(50)
-        self.spinBox_iter.setProperty("value", 100)
+        self.spinBox_iter.setProperty("value", cfg['search_options']['iterations'])
         self.spinBox_iter.setObjectName("spinBox_iter")
         
         ########!!!
@@ -374,10 +335,6 @@ class Ui_MainWindow(QMainWindow):
         self.label_8.setWordWrap(True)
         self.label_8.setObjectName("label_8")
         
-#        self.btn_search_exit = QtWidgets.QPushButton(self.search)
-#        self.btn_search_exit.setEnabled(False)
-#        self.btn_search_exit.setGeometry(QtCore.QRect(110, 270, 71, 23))
-#        self.btn_search_exit.setObjectName("btn_search_exit")
         self.menu = QtWidgets.QFrame(self.centralwidget)
         self.menu.setEnabled(True)
         self.menu.setGeometry(QtCore.QRect(10, 10, 301, 431))
@@ -508,13 +465,15 @@ class Ui_MainWindow(QMainWindow):
 
 # %% 
 
-    def retranslateUi(self, MainWindow):
+    def retranslateUi(self, MainWindow): # in russian
+        cfg = config.load_config()
+        
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "AutoML"))
         self.label_4.setText(_translate("MainWindow", "Новый эксперимент"))
         self.label_2.setText(_translate("MainWindow", "Максимальная длительность поиска (сек)"))
         self.label_5.setText(_translate("MainWindow", "Максимальный объем памяти занимаемый моделью (байт)"))
-        self.lineEdit_experiment_name.setText(_translate("MainWindow", self.experiment_name))
+        self.lineEdit_experiment_name.setText(_translate("MainWindow", cfg['experiment_name']))
         self.label_6.setText(_translate("MainWindow", "Максимальное время выполнения прогноза (мс)"))
         self.label_12.setText(_translate("MainWindow", "Загрузите файл с описанием колонок"))
         self.label_14.setText(_translate("MainWindow", "Загрузите набор данных"))
@@ -528,7 +487,6 @@ class Ui_MainWindow(QMainWindow):
         self.btn_goto_menu.setText(_translate("MainWindow", "Меню"))
         self.label.setText(_translate("MainWindow", "По завершению поиска результаты будут сохранены в:"))
         self.label_8.setText(_translate("MainWindow", r"C:\Users\maxim\Dropbox\auto_ml\experiment_1"))
-        #self.btn_search_exit.setText(_translate("MainWindow", "Выход"))
         self.btn_menu_search.setText(_translate("MainWindow", "Подбор модели"))
         self.btn_menu_exit.setText(_translate("MainWindow", "Выход"))
         self.label_10.setText(_translate("MainWindow", "Тестирование"))
@@ -538,8 +496,7 @@ class Ui_MainWindow(QMainWindow):
         self.btnLoadDataset_2.setText(_translate("MainWindow", "Загрузить"))
         self.pushButton_10.setText(_translate("MainWindow", "Назад"))
         self.pushButtonNext1_6.setText(_translate("MainWindow", "Сделать прогноз"))
-        self.btnSettings_4.setText(_translate("MainWindow", "Тестирование"))
-        #!!!
+        self.btnSettings_4.setText(_translate("MainWindow", "Тестирование")) #!!!   
         self.label_9.setText(_translate("MainWindow", "Максимальное число итераций оптимизатора"))
       
 # %%
@@ -551,12 +508,14 @@ class Ui_MainWindow(QMainWindow):
         #Nikon (*.nef;*.nrw);;Sony (*.arw;*.srf;*.sr2);;All Files (*.*)
         fpath = fileDlg.getOpenFileName(filter="Набор данных (*.csv)")[0] #;;Excel (*.xlsx)
         fpath=os.path.normpath(fpath)
-#        print('Dataset path:',fpath)
+        print('Dataset path:',fpath) #!!! DEBUG
         
-        # if file exist
+        # if DS file exist
         if os.path.isfile(fpath):
-#            config.handle_dataset_path(fpath)
-            self.dataset_path=fpath
+            #config.handle_dataset_path(fpath)
+            cfg = config.load_config()       
+            cfg['paths']['DS_abs_path'] = fpath
+            config.save_config(cfg)
             
             _translate = QtCore.QCoreApplication.translate
             self.btnLoadDataset.setText(_translate("MainWindow", "Загружено"))
@@ -566,47 +525,27 @@ class Ui_MainWindow(QMainWindow):
         
 # %%
         
-    def load_column_description_dialog(self):
-        
+    def load_column_description_dialog(self):      
         fileDlg = QFileDialog(self)
-        from os.path import expanduser
+        #fileDlg.setDirectory('./')
         fileDlg.setDirectory(expanduser("~"))
+        #Nikon (*.nef;*.nrw);;Sony (*.arw;*.srf;*.sr2);;All Files (*.*)
         fpath = fileDlg.getOpenFileName(filter="Описание столбцов (*.csv)")[0]
         fpath=os.path.normpath(fpath)        
-#        print('Columns description file path:',fpath)
+        print('Columns description file path:',fpath) #!!! DEBUG
         
         #if CD file exist
         if os.path.isfile(fpath):
-            self.column_description_path=fpath        
+            #config.handle_column_description_path(fpath)
+            cfg = config.load_config()            
+            cfg['paths']['CD_abs_path'] = fpath  
+            config.save_config(cfg)
+            
             _translate = QtCore.QCoreApplication.translate
             self.btnLoadColumnsDescription.setText(_translate("MainWindow", "Загружено"))
             font = QtGui.QFont()
             font.setUnderline(False)
             self.btnLoadColumnsDescription.setFont(font)
-
-# %%
-
-    def load_DS_from_disc(self):
-        
-        from pathlib import Path
-        dataset_path = str(Path(self.dataset_path))  
-        """
-        from numpy import genfromtxt
-        self.DS = genfromtxt(dataset_path, delimiter=',')   # ,dtype=None, encoding=None
-        """
-        import pandas
-        self.DS = pandas.read_csv(dataset_path, skiprows=0).dropna(how='any').as_matrix()
-
-    
-# %% 
-     
-    def load_CD_from_disc(self):
-        from numpy import genfromtxt
-        from pathlib import Path
-        column_description_path = str(Path(self.column_description_path))
-        numpy_cd = genfromtxt(column_description_path, delimiter=',', 
-                              dtype=None, encoding=None)  
-        self.CD = numpy_cd.tolist()  
 
 # %%
     def checkbox_state(self, checkbox):
@@ -616,21 +555,29 @@ class Ui_MainWindow(QMainWindow):
             return False    
                
         
-    def load_settings_from_gui(self):
-        self.lcd_bool = True
+    def load_settings_from_gui(self): # in config.json
         
-        self.experiment_name = self.lineEdit_experiment_name.text()
-        self.duration = self.spinBox_all_time.value()
-        self.min_accuracy = self.spinBox_min_accuracy.value()
-        self.max_model_memory = self.spinBox_model_max_memory.value()
-        self.max_prediction_time = self.spinBox_max_predict_time.value()
-        self.max_train_time = self.spinBox_all_time_2.value()
-        self.iterations = self.spinBox_iter.value()
+        self.lcd_bool = True  # TODO fix
         
-        self.used_algorithms = {
+        cfg = config.load_config()
+        
+        cfg['experiment_name'] = self.lineEdit_experiment_name.text()
+        
+        cfg['model_requirements']['min_accuracy'] = self.spinBox_min_accuracy.value()
+        cfg['model_requirements']['max_memory'] = self.spinBox_model_max_memory.value()
+        cfg['model_requirements']['max_single_predict_time'] = self.spinBox_max_predict_time.value()
+        cfg['model_requirements']['max_train_time'] = self.spinBox_all_time_2.value()
+        
+        cfg['search_options']['duration'] = self.spinBox_all_time.value()
+        cfg['search_options']['iterations'] = self.spinBox_iter.value()
+        cfg['search_options']['metric'] = self.dialog_settings.comboBox_metric.currentText()
+        cfg['search_options']['validation'] = self.dialog_settings.comboBox_validation.currentText() # TODO change API
+        cfg['search_options']['saved_top_models_amount'] = self.dialog_settings.comboBox_saved_count.currentText() # TODO change API
+        
+        cfg['search_space'] = {
         'AdaBoost':self.checkbox_state(self.dialog_settings.checkBox_AdaBoost), 
         'XGBoost':self.checkbox_state(self.dialog_settings.checkBox_XGBoost ), 
-        'Bagging(SVС)':self.checkbox_state(self.dialog_settings.checkBox_BaggingSVC ), 
+        'Bagging(SVC)':self.checkbox_state(self.dialog_settings.checkBox_BaggingSVC ), 
         'MLP':self.checkbox_state(self.dialog_settings.checkBox_MLP ), 
         'HistGB':self.checkbox_state(self.dialog_settings.checkBox_HistGB ), 
         'Ridge':self.checkbox_state(self.dialog_settings.checkBox_Ridge ), 
@@ -642,7 +589,7 @@ class Ui_MainWindow(QMainWindow):
         'Perceptron':self.checkbox_state(self.dialog_settings.checkBox_Perceptron ),      
         'SVM':self.checkbox_state(self.dialog_settings.checkBox_SVM ), 
         'RandomForest':self.checkbox_state(self.dialog_settings.checkBox_RandomForest ), 
-        'ExRandTrees':self.checkbox_state(self.dialog_settings.checkBox_xRandTrees ), 
+        'xRandTrees':self.checkbox_state(self.dialog_settings.checkBox_xRandTrees ), 
         'ELM':self.checkbox_state(self.dialog_settings.checkBox_ELM ), 
         'DecisionTree':self.checkbox_state(self.dialog_settings.checkBox_DecisionTree ), 
         'SGD':self.checkbox_state(self.dialog_settings.checkBox_SGD ), 
@@ -655,11 +602,9 @@ class Ui_MainWindow(QMainWindow):
         'DBN':self.checkbox_state(self.dialog_settings.checkBox_DBN ),  
         'FactorizationMachine':self.checkbox_state(self.dialog_settings.checkBox_FactorizationMachine ), 
         'PolynomialNetwork':self.checkbox_state(self.dialog_settings.checkBox_PolynomialNetwork )
-        }
-                
-        self.metric = self.dialog_settings.comboBox_metric.currentText()
-        self.validation =self.dialog_settings.comboBox_validation.currentText()
-        self.saved_models_count=self.dialog_settings.comboBox_saved_count.currentText()      
+        }        
+        
+        config.save_config(cfg)
 
 # %% 
         
@@ -688,8 +633,10 @@ class Ui_MainWindow(QMainWindow):
         
         
          
-    def start_timer(self):         
-        self.lcd.display(self.duration)
+    def start_timer(self): 
+        cfg = config.load_config()
+               
+        self.lcd.display(cfg['search_options']['duration'] )
         timer_thread = TimerThread(self)
 
         #thread.finished.connect(app.exit) #закрыть всё по завершению не уверен
@@ -697,15 +644,16 @@ class Ui_MainWindow(QMainWindow):
         timer_thread.signal_timer_finish.connect(self.slot_finish)
         
         self.signal_start_timer.connect(timer_thread.slot_timer_start) 
-        self.signal_start_timer.emit(self.duration)
+        self.signal_start_timer.emit(cfg['search_options']['duration'] )
         
         timer_thread.start()  
         
         
 # %%
     
-    def check_models(self):       
-        for val in self.used_algorithms.values():
+    def check_models(self):  
+        cfg = config.load_config()       
+        for val in cfg['search_space'].values():
             if(val==True):
                 return True   
         return False
@@ -713,22 +661,23 @@ class Ui_MainWindow(QMainWindow):
 # %%     
         
     def start_selection(self): 
-        
-        if(self.dataset_path!=None and self.column_description_path!= None) : 
+        cfg = config.load_config() # first call      
+        if( (cfg['paths']['DS_abs_path'] != None) and (cfg['paths']['CD_abs_path'] != None) ): 
               
-            # загрузка данных с форм GUI                  
+            # load setting from GUI to config.json                 
             self.load_settings_from_gui()
             
-            if(self.experiment_name!=''): 
-                
+            # update var
+            cfg = config.load_config() 
+            
+            if( cfg['experiment_name'] != ''): 
+             
                 if(self.check_models()==True):
                     self.search.raise_()
                     
-                    self.load_DS_from_disc()
-                    self.load_CD_from_disc() 
-                    ######################################################            
+                    ###########################           
                     self.start_timer()
-                    ######################################################           
+                    ###########################         
                     
                     MS_thread = ModelSeletionThread(self)
             
@@ -736,28 +685,15 @@ class Ui_MainWindow(QMainWindow):
                     #MS_thread.signal_timer.connect(self.slot_timer)  
                     #MS_thread.signal_timer_finish.connect(self.slot_finish)
                     MS_thread.signal_model_selection_finish.connect(self.slot_search_end)
-                    
-                    self.signal_start_MS.connect(MS_thread.slot_start_model_selection_) 
-                    
-                    self.signal_start_MS.emit(self.DS, self.CD, self.experiment_name, 
-                        self.duration, self.min_accuracy, self.max_model_memory, 
-                        self.max_prediction_time, self.max_train_time, 
-                        self.used_algorithms, self.metric, self.validation, 
-                        self.saved_models_count, self.iterations
-                        )
-                    
+                  
                     MS_thread.start()  
                 else:
-                    self.warning_models.show()
-                
+                    self.warning_models.show()             
             else:
-                self.warning_name.show()
-            
+                self.warning_name.show()            
         else:
            self.warning_paths.show()
-
-            
-            
+        
 
 # %%
 
