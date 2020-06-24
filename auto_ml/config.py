@@ -16,6 +16,7 @@ config_name = 'config.json'
 # destination:
 # *containing default values
 # *saving different configs
+# *containing temp values?
 
 default_config = {   
                     # Only English or Unicode allowed for strings
@@ -76,7 +77,7 @@ default_config = {
                             #        'value':10,  # 10 CV or 70 holdout
                             #    },
                             
-                            'saved_top_models_amount':'Все', # to English
+                            'saved_top_models_amount':'All',
                             # TODO change ModelSelection API
                             #'saved_top_models_amount':1, # number or 'all' 
                         },
@@ -87,10 +88,10 @@ default_config = {
                             'CD_abs_path':None,
                         },
                         
-                    'global_variables': # move to glob_var.pickle
+                    'global_variables': #TODO move to glob_var.pickle?
                         {                        
                             'DS_name':None,
-                            'DS_type':None, # csv,  TODO excel
+                            'DS_type':None, # csv,  #TODO excel
                             
                             'CD_name':None,
                             'CD_type':None, # csv

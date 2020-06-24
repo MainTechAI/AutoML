@@ -3,8 +3,6 @@
 # Form implementation generated from reading ui file '1dialog.ui'
 #
 # Created by: PyQt5 UI code generator 5.11.3
-#
-# WARNING! All changes made in this file will be lost!
 
 import config
 from PyQt5 import QtCore, QtGui, QtWidgets
@@ -281,16 +279,16 @@ class Ui_Dialog(QDialog):
 
     def retranslateUi(self, Dialog):
         _translate = QtCore.QCoreApplication.translate
-        Dialog.setWindowTitle(_translate("Dialog", "Дополнительные настройки"))
-        self.comboBox_saved_count.setItemText(0, _translate("Dialog", "Все"))
-        self.comboBox_saved_count.setItemText(1, _translate("Dialog", "Лучшая"))
-        self.comboBox_saved_count.setItemText(2, _translate("Dialog", "Топ 5"))
-        self.comboBox_saved_count.setItemText(3, _translate("Dialog", "Топ 10"))
-        self.comboBox_saved_count.setItemText(4, _translate("Dialog", "Топ 25"))
-        self.comboBox_saved_count.setItemText(5, _translate("Dialog", "Топ 50"))
+        Dialog.setWindowTitle(_translate("Dialog", "Advanced settings"))
+        self.comboBox_saved_count.setItemText(0, _translate("Dialog", "All"))
+        self.comboBox_saved_count.setItemText(1, _translate("Dialog", "The best"))
+        self.comboBox_saved_count.setItemText(2, _translate("Dialog", "Top 5"))
+        self.comboBox_saved_count.setItemText(3, _translate("Dialog", "Top 10"))
+        self.comboBox_saved_count.setItemText(4, _translate("Dialog", "Top 25"))
+        self.comboBox_saved_count.setItemText(5, _translate("Dialog", "Top 50"))
         
-        self.label.setText(_translate("Dialog", "Количество сохраняемых моделей"))
-        self.label_2.setText(_translate("Dialog", "Пространство поиска"))
+        self.label.setText(_translate("Dialog", "Number of best models saved"))
+        self.label_2.setText(_translate("Dialog", "Search space"))
         self.checkBox_BernoulliNB.setText(_translate("Dialog", "BernoulliNB"))
         self.checkBox_LogisticRegression.setText(_translate("Dialog", "LogisticRegression"))
         self.checkBox_XGBoost.setText(_translate("Dialog", "XGBoost"))
@@ -323,13 +321,13 @@ class Ui_Dialog(QDialog):
         self.comboBox_metric.setItemText(1, _translate("Dialog", "f1"))
         self.comboBox_metric.setItemText(2, _translate("Dialog", "f1_micro"))
         self.comboBox_metric.setItemText(3, _translate("Dialog", "f1_macro"))
-        self.label_5.setText(_translate("Dialog", "Валидация"))
+        self.label_5.setText(_translate("Dialog", "Validation"))
         self.comboBox_validation.setItemText(0, _translate("Dialog", "10 fold CV"))
         self.comboBox_validation.setItemText(1, _translate("Dialog", "5 fold CV"))
         self.comboBox_validation.setItemText(2, _translate("Dialog", "3 fold CV"))
         self.comboBox_validation.setItemText(3, _translate("Dialog", "holdout"))
-        self.btn_ok.setText(_translate("Dialog", "Применить"))
-        self.label_4.setText(_translate("Dialog", "Экспериментальные"))
+        self.btn_ok.setText(_translate("Dialog", "Apply"))
+        self.label_4.setText(_translate("Dialog", "Experimental"))
         
         
         
@@ -337,12 +335,12 @@ class Ui_Dialog(QDialog):
         items=[]
         
         if(CB_type == 'saved_count'):
-            items.append("Все")
-            items.append("Лучшая")
-            items.append("Топ 5")
-            items.append("Топ 10")
-            items.append("Топ 25")
-            items.append("Топ 50")
+            items.append("All")
+            items.append("The best")
+            items.append("Top 5")
+            items.append("Top 10")
+            items.append("Top 25")
+            items.append("Top 50")
             for i in range(0, len(items)):
                 if(items[i]==str_val):
                     return i
@@ -405,9 +403,9 @@ class Ui_WarningPaths(QDialog):
 
     def retranslateUi(self, WarningPaths):
         _translate = QtCore.QCoreApplication.translate
-        WarningPaths.setWindowTitle(_translate("WarningPaths", "Предупреждение"))
-        self.label.setText(_translate("WarningPaths", "Файл с набором данных и файл с описанием его столбцов должны быть загружены"))
-
+        WarningPaths.setWindowTitle(_translate("WarningPaths", "Warning"))
+        self.label.setText(_translate("WarningPaths", "Dataset and column description must be loaded"))
+        
 
 
 
@@ -440,10 +438,10 @@ class Ui_WarningName(QDialog):
         
         self.setModal(True)
 
-    def retranslateUi(self, WarningPaths):
+    def retranslateUi(self, WarningName):
         _translate = QtCore.QCoreApplication.translate
-        WarningPaths.setWindowTitle(_translate("WarningPaths", "Предупреждение"))
-        self.label.setText(_translate("WarningPaths", "Название эксперимента не должно быть пустым"))
+        WarningName.setWindowTitle(_translate("WarningName", "Warning"))
+        self.label.setText(_translate("WarningName", "Field \'experiment name\' must be filled"))
 
 
 
@@ -454,7 +452,7 @@ class Ui_WarningModels(QDialog):
         self.setupUi()
     
     def setupUi(self):
-        self.setObjectName("WarningName")
+        self.setObjectName("WarningModels")
         self.resize(234, 106)
         self.buttonBox = QtWidgets.QDialogButtonBox(self)
         self.buttonBox.setGeometry(QtCore.QRect(140, 70, 81, 32))
@@ -477,10 +475,10 @@ class Ui_WarningModels(QDialog):
         
         self.setModal(True)
 
-    def retranslateUi(self, WarningPaths):
+    def retranslateUi(self, WarningModels):
         _translate = QtCore.QCoreApplication.translate
-        WarningPaths.setWindowTitle(_translate("Ui_WarningModels", "Предупреждение"))
-        self.label.setText(_translate("WarningPaths", "Выберите хотя бы один алгоритм классификации"))
+        WarningModels.setWindowTitle(_translate("WarningModels", "Warning"))
+        self.label.setText(_translate("WarningModels", "Select at least one classification algorithm"))
 
 
 

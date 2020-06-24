@@ -22,6 +22,8 @@ class ModelSelection:
         self.cat_columns = []
         self.path_to_save = None
         
+        self.CV_jobs=1  
+        
         ###!!!  DEV
         
         self.DS=DS
@@ -44,8 +46,7 @@ class ModelSelection:
         
         
         
-        self.valtype=''       
-        self.CV_jobs=1              
+        self.valtype=''                       
         self.cv_splits=None
         
         if(self.validation in ["3 fold CV","5 fold CV","10 fold CV"]):
@@ -139,7 +140,7 @@ class ModelSelection:
                 elif args['name']=='XGBoost':                     
                     clf = args['model'](
                         learning_rate = args['param']['learning_rate'],                     
-                        #  убрал из-за низкой эффективности
+                        # low efficiency
                         #booster = args['param']['booster'],
                         #n_estimators = args['param']['n_estimators'],                          
                         #subsample = args['param']['subsample'],
@@ -150,7 +151,7 @@ class ModelSelection:
                         #reg_lambda = args['param']['reg_lambda']  ,      
                         #reg_alpha = args['param']['reg_alpha']  ,              
                     )
-                    # scale не нужно 
+                    # scale removed
                         
                 elif args['name']=='RandomForest': 
                     clf = args['model'](
@@ -173,11 +174,11 @@ class ModelSelection:
                     
                 elif args['name']=='LinearSVC': 
                     clf = args['model'](
-                        C =  args['param']['C'],
-                        tol =  args['param']['tol'],
-                        dual =  args['param']['dual'],
-                        max_iter =  args['param']['max_iter'])
-                    if(args['scale']==True):               
+                        C = args['param']['C'],
+                        tol = args['param']['tol'],
+                        dual = args['param']['dual'],
+                        max_iter = args['param']['max_iter'])
+                    if(args['scale'] == True):               
                         clf = make_pipeline(StandardScaler(), clf)
                  
                 elif args['name']=='HistGB': 
@@ -232,7 +233,7 @@ class ModelSelection:
                         a =  args['param']['a'],
                         )
                 
-                elif args['name']=='Bagging(SVС)': # rbf
+                elif args['name']=='Bagging(SVC)': # rbf
                     base=args['param']['base_estimator']['model'](
                         kernel = args['param']['base_estimator']['kernel'],
                         gamma = args['param']['base_estimator']['gamma'],
@@ -250,8 +251,7 @@ class ModelSelection:
                     clf = args['model']()
                     # TODO add other                
                 
-                #%%
-                                
+                #%%                               
                 if( self.valtype=='CV' ):                                    
                     start_timer = perf_counter()  
                      
@@ -333,8 +333,7 @@ class ModelSelection:
                         'train_time': None,
                         'model_name': None,
                         'model':None
-                        }
-        
+                        }       
         #%%
         
         # Prepairing to search      
@@ -380,7 +379,7 @@ class ModelSelection:
     
 # %%    
             
-    def save_n_best_on_disk(self):
+    def save_n_best_on_disk(self, save_excel = True , save_config = True):
         
         def save_model(to_persist, name):
             import os   
@@ -405,22 +404,22 @@ class ModelSelection:
         self.optimal_results.sort(key = sortSecond, reverse = True)         
         
         
-        if(self.saved_models_count == "Все"):
+        if(self.saved_models_count == "All"):
             for i in range(len(self.optimal_results)):
                 model=self.optimal_results[i][1]
                 name=str(i+1)+'_'+str(self.optimal_results[i][2])+'_'+str(self.optimal_results[i][0])
                 save_model(model,name)
             
         else:
-            if(self.saved_models_count == "Топ 5"):
-                model_num=5
-            elif(self.saved_models_count == "Топ 10"):
-                model_num=10
-            elif(self.saved_models_count == "Лучшая"):
+            if(self.saved_models_count == "The best"):
                 model_num=1
-            elif(self.saved_models_count == "Топ 25"):
+            elif(self.saved_models_count == "Top 5"):
+                model_num=5
+            elif(self.saved_models_count == "Top 10"):
+                model_num=10
+            elif(self.saved_models_count == "Top 25"):
                 model_num=25
-            elif(self.saved_models_count == "Топ 50"):
+            elif(self.saved_models_count == "Top 50"):
                 model_num=50
                 
             if(len(self.optimal_results)<model_num):
@@ -431,9 +430,13 @@ class ModelSelection:
                 name=str(i+1)+'_'+str(self.optimal_results[i][2])+'_'+str(self.optimal_results[i][0])
                 save_model(model,name)
         
-        self.results_excel.sort_values(by='accuracy', ascending=False,inplace=True)
-        self.results_excel.to_excel(self.experiment_name+"\\model_selection_results.xlsx")
-        #TODO save all experiment settings in JSON?
+        if(save_excel == True):
+            self.results_excel.sort_values(by='accuracy', ascending=False,inplace=True)
+            self.results_excel.to_excel(self.experiment_name+"\\"+self.experiment_name+"_results.xlsx")
+        
+        if(save_config == True):
+            pass
+            #TODO also save all experiment settings in JSON
         
 #['accuracy']['model']['model_name']['model_memory']['prediction_time']['train_time'] 
    
@@ -470,11 +473,7 @@ class DataPreprocessing:
         self.DS = DS.copy()
         self.CD = CD.copy()
         
-        # заменил на очистку при загрузке
-        # не работает при category
-        # self.handle_missing()
-        self.col_grouping()       
-        
+        self.col_grouping()               
         
 # %%         
 
@@ -485,11 +484,11 @@ class DataPreprocessing:
         self.label_index = None
         
         for column in self.CD:
-            if(column[1]=='Num'):
+            if(column[1] == 'Num'):
                 self.num_index.append(column[0]-1)
-            elif(column[1]=='Categ'):
+            elif(column[1] == 'Categ'):
                 self.categ_index.append(column[0]-1)  
-            elif(column[1]=='Label'):
+            elif(column[1] == 'Label'):
                 self.label_index = column[0]-1 
                 
         self.num_col   = self.DS[:,self.num_index]
@@ -500,7 +499,7 @@ class DataPreprocessing:
     
     def encode_cat_col(self):
         
-        enc = OrdinalEncoder(return_df=False).fit(self.categ_col)
+        enc = OrdinalEncoder(return_df = False).fit(self.categ_col)
         self.categ_col = enc.transform(self.categ_col) 
         
         # DEBUG
@@ -563,7 +562,7 @@ class DataPreprocessing:
 
 
 
-# %%
+# %% REMOVE LATER
 
 
 def foo(): # всё ок

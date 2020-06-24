@@ -41,7 +41,7 @@
         "iterations": 100,
         "metric": "accuracy",
         "validation": "10 fold CV",
-        "saved_top_models_amount": "\u0412\u0441\u0435"
+        "saved_top_models_amount": "All"
     },
     "paths": {
         "DS_abs_path": null,

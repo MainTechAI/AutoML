@@ -270,7 +270,7 @@ class Ui_MainWindow(QMainWindow):
         self.spinBox_all_time_2.setProperty("value", cfg['model_requirements']['max_train_time'])
         self.spinBox_all_time_2.setObjectName("spinBox_all_time_2")
         
-        #######!!!
+        #######
         
         self.label_9 = QtWidgets.QLabel(self.new_experiment)
         self.label_9.setGeometry(QtCore.QRect(20, 280, 170, 30))
@@ -285,7 +285,7 @@ class Ui_MainWindow(QMainWindow):
         self.spinBox_iter.setProperty("value", cfg['search_options']['iterations'])
         self.spinBox_iter.setObjectName("spinBox_iter")
         
-        ########!!!
+        ########
         
         self.search = QtWidgets.QFrame(self.centralwidget)
         self.search.setEnabled(True)
@@ -444,7 +444,7 @@ class Ui_MainWindow(QMainWindow):
         self.retranslateUi(self)
         self.btn_menu_search.clicked.connect(self.new_experiment.raise_)
         self.btn_menu_exit.clicked.connect(sys.exit)        
-        self.btnStart.clicked.connect(self.start_selection)   # начать
+        self.btnStart.clicked.connect(self.start_selection)   # start
         self.btn_exp_back.clicked.connect(self.menu.raise_)
                 
         # защита от повторного нажатия после перезахода
@@ -456,7 +456,6 @@ class Ui_MainWindow(QMainWindow):
         self.btnLoadColumnsDescription.clicked.connect(self.load_column_description_dialog)
         
         # Доп. настройки
-#        self.btn_settings.clicked.connect(self.dialog_settings.refresh)
         self.btn_settings.clicked.connect(self.dialog_settings.show)
         
         QtCore.QMetaObject.connectSlotsByName(self)
@@ -470,34 +469,34 @@ class Ui_MainWindow(QMainWindow):
         
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "AutoML"))
-        self.label_4.setText(_translate("MainWindow", "Новый эксперимент"))
-        self.label_2.setText(_translate("MainWindow", "Максимальная длительность поиска (сек)"))
-        self.label_5.setText(_translate("MainWindow", "Максимальный объем памяти занимаемый моделью (байт)"))
+        self.label_4.setText(_translate("MainWindow", "New experiment"))
+        self.label_2.setText(_translate("MainWindow", "Max search duration (sec)"))
+        self.label_5.setText(_translate("MainWindow", "Max model memory (byte)"))
         self.lineEdit_experiment_name.setText(_translate("MainWindow", cfg['experiment_name']))
-        self.label_6.setText(_translate("MainWindow", "Максимальное время выполнения прогноза (мс)"))
-        self.label_12.setText(_translate("MainWindow", "Загрузите файл с описанием колонок"))
-        self.label_14.setText(_translate("MainWindow", "Загрузите набор данных"))
-        self.btnLoadColumnsDescription.setText(_translate("MainWindow", "Загрузить"))
-        self.btnLoadDataset.setText(_translate("MainWindow", "Загрузить"))
-        self.btn_exp_back.setText(_translate("MainWindow", "Назад"))
-        self.btnStart.setText(_translate("MainWindow", "Начать"))
-        self.btn_settings.setText(_translate("MainWindow", "Доп. настройки"))
-        self.label_3.setText(_translate("MainWindow", "Минимальная точность"))
-        self.label_7.setText(_translate("MainWindow", "Максимальное время обучения модели (сек)"))
-        self.btn_goto_menu.setText(_translate("MainWindow", "Меню"))
-        self.label.setText(_translate("MainWindow", "По завершению поиска результаты будут сохранены в:"))
+        self.label_6.setText(_translate("MainWindow", "Max predict time (ms)"))
+        self.label_12.setText(_translate("MainWindow", "Load column description"))
+        self.label_14.setText(_translate("MainWindow", "Load dataset"))
+        self.btnLoadColumnsDescription.setText(_translate("MainWindow", "Load"))
+        self.btnLoadDataset.setText(_translate("MainWindow", "Load"))
+        self.btn_exp_back.setText(_translate("MainWindow", "Back"))
+        self.btnStart.setText(_translate("MainWindow", "Start"))
+        self.btn_settings.setText(_translate("MainWindow", "Advanced settings"))
+        self.label_3.setText(_translate("MainWindow", "Min accuracy"))
+        self.label_7.setText(_translate("MainWindow", "Max model training time (sec)"))
+        self.btn_goto_menu.setText(_translate("MainWindow", "Menu"))
+        self.label.setText(_translate("MainWindow", "Upon completion of the search, the results will be saved in:"))
         self.label_8.setText(_translate("MainWindow", r"C:\Users\maxim\Dropbox\auto_ml\experiment_1"))
-        self.btn_menu_search.setText(_translate("MainWindow", "Подбор модели"))
-        self.btn_menu_exit.setText(_translate("MainWindow", "Выход"))
-        self.label_10.setText(_translate("MainWindow", "Тестирование"))
-        self.label_16.setText(_translate("MainWindow", "Загрузите набор данных"))
-        self.label_17.setText(_translate("MainWindow", "Загрузите модель"))
-        self.btnLoadColumnsDescription_2.setText(_translate("MainWindow", "Загрузить"))
-        self.btnLoadDataset_2.setText(_translate("MainWindow", "Загрузить"))
-        self.pushButton_10.setText(_translate("MainWindow", "Назад"))
-        self.pushButtonNext1_6.setText(_translate("MainWindow", "Сделать прогноз"))
-        self.btnSettings_4.setText(_translate("MainWindow", "Тестирование")) #!!!   
-        self.label_9.setText(_translate("MainWindow", "Максимальное число итераций оптимизатора"))
+        self.btn_menu_search.setText(_translate("MainWindow", "Model selection"))
+        self.btn_menu_exit.setText(_translate("MainWindow", "Exit"))
+        self.label_10.setText(_translate("MainWindow", "Testing")) #!!! not implemented
+        self.label_16.setText(_translate("MainWindow", "Load dataset")) #!!! not implemented
+        self.label_17.setText(_translate("MainWindow", "Load model")) #!!! not implemented
+        self.btnLoadColumnsDescription_2.setText(_translate("MainWindow", "Load"))
+        self.btnLoadDataset_2.setText(_translate("MainWindow", "Load"))
+        self.pushButton_10.setText(_translate("MainWindow", "Back"))
+        self.pushButtonNext1_6.setText(_translate("MainWindow", "Make prediction")) #!!!  
+        self.btnSettings_4.setText(_translate("MainWindow", "Testing")) #!!!   
+        self.label_9.setText(_translate("MainWindow", "Max iterations"))
       
 # %%
      
@@ -506,9 +505,9 @@ class Ui_MainWindow(QMainWindow):
         #fileDlg.setDirectory('./')
         fileDlg.setDirectory(expanduser("~")) 
         #Nikon (*.nef;*.nrw);;Sony (*.arw;*.srf;*.sr2);;All Files (*.*)
-        fpath = fileDlg.getOpenFileName(filter="Набор данных (*.csv)")[0] #;;Excel (*.xlsx)
+        fpath = fileDlg.getOpenFileName(filter="Dataset (*.csv)")[0] #;;Excel (*.xlsx)
         fpath=os.path.normpath(fpath)
-        print('Dataset path:',fpath) #!!! DEBUG
+        #print('Dataset path:',fpath) #!!! DEBUG
         
         # if DS file exist
         if os.path.isfile(fpath):
@@ -518,7 +517,7 @@ class Ui_MainWindow(QMainWindow):
             config.save_config(cfg)
             
             _translate = QtCore.QCoreApplication.translate
-            self.btnLoadDataset.setText(_translate("MainWindow", "Загружено"))
+            self.btnLoadDataset.setText(_translate("MainWindow", "Loaded"))
             font = QtGui.QFont()
             font.setUnderline(False)
             self.btnLoadDataset.setFont(font)            
@@ -530,9 +529,9 @@ class Ui_MainWindow(QMainWindow):
         #fileDlg.setDirectory('./')
         fileDlg.setDirectory(expanduser("~"))
         #Nikon (*.nef;*.nrw);;Sony (*.arw;*.srf;*.sr2);;All Files (*.*)
-        fpath = fileDlg.getOpenFileName(filter="Описание столбцов (*.csv)")[0]
+        fpath = fileDlg.getOpenFileName(filter="Column description (*.csv)")[0]
         fpath=os.path.normpath(fpath)        
-        print('Columns description file path:',fpath) #!!! DEBUG
+        #print('Columns description file path:',fpath) #!!! DEBUG
         
         #if CD file exist
         if os.path.isfile(fpath):
@@ -542,7 +541,7 @@ class Ui_MainWindow(QMainWindow):
             config.save_config(cfg)
             
             _translate = QtCore.QCoreApplication.translate
-            self.btnLoadColumnsDescription.setText(_translate("MainWindow", "Загружено"))
+            self.btnLoadColumnsDescription.setText(_translate("MainWindow", "Loaded"))
             font = QtGui.QFont()
             font.setUnderline(False)
             self.btnLoadColumnsDescription.setFont(font)
@@ -628,7 +627,7 @@ class Ui_MainWindow(QMainWindow):
         self.lcd_bool = False
         self.btn_goto_menu.setEnabled(True)
         _translate = QtCore.QCoreApplication.translate
-        self.label.setText(_translate("MainWindow", "Поиск завершен, результаты сохранены в:"))
+        self.label.setText(_translate("MainWindow", "Search completed, results saved to:"))
         
         
         

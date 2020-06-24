@@ -1474,20 +1474,18 @@ class ELM:
         """     
 
         self.name = 'Extreme learning machine'
-        self.short_name = 'ELM'
-        
-        self.scale = None
-        
+        self.short_name = 'ELM'    
+     
         self.default_parameters={
         "hid_num":10,
         "a":1   
         }
-        
+      
         self.parameters_mandatory_first_check=[
             self.default_parameters
             ]    
         
-        
+        self.scale = None  
         self.search_space = {
         'name':'ELM',
         'model':elm.ELM,

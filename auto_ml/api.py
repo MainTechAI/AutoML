@@ -45,7 +45,7 @@ ModelSelection(
                max_train_time = 30, 
                used_algorithms = used_algo, 
                metric = 'accuracy', 
-               validation = '3 fold CV', 
-               saved_models_count = 'Топ 5',
+               validation = '10 fold CV', 
+               saved_models_count = 'All',
                iterations = 100,
                )
