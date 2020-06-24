@@ -1,10 +1,26 @@
 # -*- coding: utf-8 -*-
-"""
- переименовать p1 -> model name p1 (should be unique)
- 
- add lightGBM instead histGB
+""" 
+ add lightGBM 
  add CatBoost
+ add other from 'classifiers_moved_from_master.py'
+ 
+add INFO ABOUT DATASET like number of row, features etc
 """
+
+"""   ABOUT HPO
+If multiple fidelities are applicable:
+(i.e., if it is possible to define substantially cheaper versions 
+of the objective function of interest, such that the performance 
+for these roughly correlates with the performance for the full 
+objective function of  interest)
+    We  recommend  BOHB
+
+If multiple fidelities are not applicable:
+    
+"""
+
+
+from hyperopt import hp
 import numpy as np
 np.random.seed(0)
 
@@ -74,11 +90,6 @@ class ModelHolder:
             models.append((m.short_name, m.get_skl_estimator()))
                
         return models
-       
-# %%  
-
-#   Переделанные модели     
-from hyperopt import hp
 
 # %%      
 """
@@ -90,7 +101,8 @@ class SVM:
               
     def __init__(self, ):
         
-        self.description="""
+        """
+        # sci article №1
         
         SVM Hyperparameters range:  RBF and sigmoid (don't now about others)
                 
@@ -106,8 +118,9 @@ class SVM:
         
         For both types of SVMs, the best performance can typically be achieved 
           with low values of the gamma hyperparameter.
+          
                   
-        # статья №2
+        # sci article №2
         
         In svm the biggest gain in performance can be achieved by tuning the 
         kernel, gamma or degree and С      
@@ -121,11 +134,14 @@ class SVM:
         """     
         
         # for kernel=’linear’ use LinearSVC
+        # split into several models 
+        # *Linear SVM
+        # *RBF SVM
+        # *Sigmoid SVM
+        # *Poly SVM
 
         self.name = 'Support Vector Classification'
         self.short_name = 'SVM' 
-        
-        self.scale = True
         
         self.default_parameters={'C':1.0, 'kernel':'rbf', 'degree':3, 
             'gamma':'scale','coef0':0.0, 'shrinking':True, 'probability':False,
@@ -133,21 +149,15 @@ class SVM:
             'max_iter':-1, 'decision_function_shape':'ovr',
             'break_ties':False, 'random_state':None}
         
-        self.parameters_mandatory_first_check=[
-                {'kernel':'rbf'    , 'C':1.0, 'gamma':0.0001,'degree':2},
-                {'kernel':'rbf'    , 'C':682, 'gamma':0.005,'degree':2 },
-                {'kernel':'sigmoid', 'C':1.0, 'gamma':0.0001,'degree':2},
-                {'kernel':'poly', 'degree':3,'gamma':'scale'},
-                  self.default_parameters
-                ]    
-        
         self.parameters_range={
-#                    'gamma':[2**-15,2**3],
-#                    'C'    :[2**-5,2**15]     
+#                    'gamma':[2**-15,2**3], (log-scale)  (~10**-4 optimal)
+#                    'C'    :[2**-5,2**15], (log-scale)    
 #                    'degree':[2,5]  # for ('poly')  
                 }
         
-         # бывают довольно тяжелые сочетания параметров когда C очень большое
+        self.scale = True
+        
+        # бывают довольно тяжелые сочетания параметров когда C очень большое
         self.search_space = {
         'name':'SVM',
         'scale':hp.choice('SVM_scale_1',[True,False]),
@@ -173,102 +183,6 @@ class SVM:
     def get_skl_estimator(self, **default_parameters):
         return svm.SVC(**default_parameters)
 
-# %% 
-import xgboost
-        
-class XGBoost:          
-    def __init__(self, ):
-        
-        self.description="""
-        Salient features:
-            Clever penalization of trees
-            A proportional shrinking of leaf nodes
-            Newton Boosting
-            Extra randomization parameter
-            
-        https://xgboost.readthedocs.io/en/latest/parameter.html
-        kwargs ??
-        
-        # статья №2
-        For xgboost there are two parameters that are quite tunable:
-            learning_rate and booster. 
-        """     
-
-        self.name = 'eXtreme Gradient Boosting'
-        self.short_name = 'XGBoost'
-        
-        self.scale = None
-        
-        self.default_parameters={
-        "max_depth":3, "learning_rate":0.1, "n_estimators":100,
-        "verbosity":1, "silent":None, "objective":"binary:logistic", 
-        "booster":'gbtree', "n_jobs":1, "nthread":None, "gamma":0, 
-        "min_child_weight":1, "max_delta_step":0, "subsample":1, 
-        "colsample_bytree":1, "colsample_bylevel":1, "colsample_bynode":1, 
-        "reg_alpha":0, "reg_lambda":1, "scale_pos_weight":1, "base_score":0.5, 
-        "random_state":0, "seed":None, "missing":None
-        }        
-        self.parameters_mandatory_first_check=[
-                {"learning_rate":0.018,"n_estimators":4168},
-                {"learning_rate":0.018,"n_estimators":4168, "subsample":0.84, 
-                 "max_depth":13, "min_child_weight":2, "colsample_bytree":0.75,
-                 "colsample_bylevel":0.58,"reg_lambda":0.98, "reg_alpha":1.11},
-                self.default_parameters
-                ]    
-        self.parameters_range={
-                "n_estimators":[1,5000],
-                "learning_rate":[2**-10, 2**0], #eta
-                "subsample":[0.1, 1],
-                #"booster":["gbtree","gblinear","dart"]  
-                "max_depth":[1,15],
-                "min_child_weight":[2**0,2**7], # 2**x
-                "colsample_bytree":[0,1],
-                "colsample_bylevel":[0,1],
-                "reg_lambda":[2**-10, 2**10], # 2**x
-                "reg_alpha":[2**-10, 2**10], # 2**x          
-                }        
-        
-
-        self.search_space = {
-        'name':'XGBoost',
-        'scale':None, #hp.choice('XGBoost_scale_1',[True,False]), не нужно
-        'model':xgboost.XGBClassifier,
-        'param':{
-                #"n_estimators":hp.randint('XGBoost_p1', 500), # было 5000  
-                "learning_rate":hp.loguniform('XGBoost_p2', -6.931, 0),
-                #"subsample":hp.uniform('XGBoost_p3', 0.1, 1),               
-                #"booster": hp.choice('XGBoost_p4', ["gbtree","gblinear","dart"]),  
-                #'max_depth': hp.choice('XGBoost_p5',range(1,15)),             
-                #"min_child_weight":hp.loguniform('XGBoost_p6', 0, 4.852),            
-                #"colsample_bytree":hp.uniform('XGBoost_p7', 0,1),
-                #"colsample_bylevel":hp.uniform('XGBoost_p8', 0,1),               
-                #"reg_lambda":hp.loguniform('XGBoost_p9', -6.931, 6.931),             
-                #"reg_alpha":hp.loguniform('XGBoost_p10', -6.931, 6.931),              
-                }
-        }
-
-    def get_skl_estimator(self, **default_parameters):
-        return xgboost.XGBClassifier(**default_parameters)
-
-# %%
-"""
-
-add INFO ABOUT DATASET like number of row, features etc
-
-example how to define search space by hyperopt
-
-from hyperopt import hp 
-import numpy as np
-
-sgd_loss = hp.pchoice(’loss’, [(0.50, ’hinge’), (0.25, ’log’), (0.25, ’huber’)])
-sgd_penalty = hp.choice(’penalty’, [’l2’, ’elasticnet’])
-sgd_alpha = hp.loguniform(’alpha’, low=np.log(1e-5), high=np.log(1) )
-
-
- generalized linear model (GLM) in xgboost - basically, using linear model, instead of tree for our boosters
- https://github.com/dmlc/xgboost/blob/master/demo/guide-python/generalized_linear_model.py
-
-"""
 
 # %%
 
@@ -303,7 +217,88 @@ class LinearSVC:
 
     def get_skl_estimator(self, **default_parameters):
         return svm.LinearSVC(**default_parameters)
+    
+    
+# %% 
+import xgboost
+        
+class XGBoost:          
+    def __init__(self, ):
+        
+        """
+        generalized linear model (GLM) in xgboost - basically, using linear model, instead of tree for our boosters
+        https://github.com/dmlc/xgboost/blob/master/demo/guide-python/generalized_linear_model.py
+        
+        Salient features:
+            Clever penalization of trees
+            A proportional shrinking of leaf nodes
+            Newton Boosting
+            Extra randomization parameter
+            
+        https://xgboost.readthedocs.io/en/latest/parameter.html
+        kwargs ??
+        
+        # sci article №2
+        For xgboost there are two parameters that are quite tunable:
+            learning_rate and booster. 
+        """     
 
+        self.name = 'eXtreme Gradient Boosting'
+        self.short_name = 'XGBoost'
+        
+        self.scale = None
+        
+        self.default_parameters={
+        "max_depth":3, "learning_rate":0.1, "n_estimators":100,
+        "verbosity":1, "silent":None, "objective":"binary:logistic", 
+        "booster":'gbtree', "n_jobs":1, "nthread":None, "gamma":0, 
+        "min_child_weight":1, "max_delta_step":0, "subsample":1, 
+        "colsample_bytree":1, "colsample_bylevel":1, "colsample_bynode":1, 
+        "reg_alpha":0, "reg_lambda":1, "scale_pos_weight":1, "base_score":0.5, 
+        "random_state":0, "seed":None, "missing":None
+        }        
+        self.parameters_mandatory_first_check=[ # from sci article №2?
+                {"learning_rate":0.018,"n_estimators":4168},
+                {"learning_rate":0.018,"n_estimators":4168, "subsample":0.84, 
+                 "max_depth":13, "min_child_weight":2, "colsample_bytree":0.75,
+                 "colsample_bylevel":0.58,"reg_lambda":0.98, "reg_alpha":1.11},
+                self.default_parameters
+                ]    
+        self.parameters_range={
+                "n_estimators":[1,5000],
+                "learning_rate":[2**-10, 2**0], #eta
+                "subsample":[0.1, 1],
+                #"booster":["gbtree","gblinear","dart"]  
+                "max_depth":[1,15],
+                "min_child_weight":[2**0,2**7], # 2**x
+                "colsample_bytree":[0,1],
+                "colsample_bylevel":[0,1],
+                "reg_lambda":[2**-10, 2**10], # 2**x
+                "reg_alpha":[2**-10, 2**10], # 2**x          
+                }        
+        
+        #!!! split into different models by booster type?
+        
+        self.search_space = {
+        'name':'XGBoost',
+        'scale':None, #hp.choice('XGBoost_scale_1',[True,False]), #needless
+        'model':xgboost.XGBClassifier,
+        'param':{
+                #"n_estimators":hp.randint('XGBoost_p1', 500), # was 5000  
+                "learning_rate":hp.loguniform('XGBoost_p2', -6.931, 0),
+                #"subsample":hp.uniform('XGBoost_p3', 0.1, 1),               
+                #"booster": hp.choice('XGBoost_p4', ["gbtree","gblinear","dart"]),  
+                #'max_depth': hp.choice('XGBoost_p5',range(1,15)),             
+                #"min_child_weight":hp.loguniform('XGBoost_p6', 0, 4.852),            
+                #"colsample_bytree":hp.uniform('XGBoost_p7', 0,1),
+                #"colsample_bylevel":hp.uniform('XGBoost_p8', 0,1),               
+                #"reg_lambda":hp.loguniform('XGBoost_p9', -6.931, 6.931),             
+                #"reg_alpha":hp.loguniform('XGBoost_p10', -6.931, 6.931),              
+                }
+        }
+
+    def get_skl_estimator(self, **default_parameters):
+        return xgboost.XGBClassifier(**default_parameters)
 
 # %%  
         
@@ -314,8 +309,9 @@ from sklearn import linear_model
 class Perceptron:          
     def __init__(self, ):
         
-        self.description="""
-                         """     
+        """
+        Description
+        """     
 
         self.name = 'Perceptron'
         self.short_name = 'Perceptron'
@@ -346,8 +342,9 @@ class Perceptron:
 class Ridge:          
     def __init__(self, ):
         
-        self.description="""
-                         """     
+        """
+        Description
+        """    
 
         self.name = 'Ridge regression сlassifier'
         self.short_name = 'Ridge'
@@ -360,9 +357,6 @@ class Ridge:
             "solver":"auto", "random_state":None
                  }
         
-        self.parameters_mandatory_first_check=[
-                self.default_parameters
-                ]    
         
         self.search_space = {
         'name':'Ridge',
@@ -374,14 +368,14 @@ class Ridge:
         return linear_model.RidgeClassifier(**default_parameters)
 
 
-
 # %%
 
 class PassiveAggressive:          
     def __init__(self, ):
         
-        self.description="""
-                         """     
+        """
+        Description
+        """     
 
         self.name = 'Passive Aggressive Classifier'
         self.short_name = 'PassiveAggressive'
@@ -394,17 +388,7 @@ class PassiveAggressive:
             "n_iter_no_change":5, "shuffle":True, "verbose":0, "loss":"hinge",
             "n_jobs":None, "random_state":None, "warm_start":False,
             "class_weight":None, "average":False
-                 }
-        
-        self.parameters_mandatory_first_check=[
-                self.default_parameters
-                ]    
-        
-        self.parameters_range={
-
-                }
-        
-        self.hpo_results=[]
+                 }       
         
         self.search_space = {
         'name':'PassiveAggressive',
@@ -423,44 +407,25 @@ class LogisticRegression:
     def __init__(self, ): 
         
         # Различная важная информация об алгоритме
-        self.description="""
+        """
         LogisticRegression имеет множество солверов местами сильно влияющими на 
         результат. А также Penalties that Faster for large datasets or
         Robust to unscaled datasets
         https://scikit-learn.org/stable/modules/linear_model.html
         """       
         
-        # Название алгоритма
         self.name = 'Logistic Regression'
         self.short_name = 'LogisticRegression'
         
-        # Скейлить?
-        self.scale = True
-        
-        # Параметры модели
         self.default_parameters={'penalty':'l2', 'dual':False, 'tol':1e-4, 
                                  'C':1.0, 'fit_intercept':True, 
                                  'intercept_scaling':1, 'class_weight':None,
                                  'random_state':None, 'solver':'lbfgs', 
                                  'max_iter':100,'multi_class':'auto', 
                                  'verbose':0, 'warm_start':False, 
-                                 'n_jobs':None, 'l1_ratio':None}
+                                 'n_jobs':None, 'l1_ratio':None}                 
         
-        # Список обязательных к проверке параметров
-        self.parameters_mandatory_first_check=[
-#                {'C':1.0, 'kernel':'rbf', 'gamma':0.0001},
-                self.default_parameters
-                ]     
-        
-        # Границы парамтров подбираемых в HPO
-        self.parameters_range={
-#                    'gamma':[2**-15,2**3],
-#                    'C'    :[2**-5,2**15]                
-                }
-        
-        # Результаты Hyper Parameter Optimization
-        # parameters,full_time, inference, fit_time, score_time, mem, score
-        self.hpo_results=[]
+        self.scale = True
         
         self.search_space = {
         'name':'LogisticRegression',
@@ -470,20 +435,7 @@ class LogisticRegression:
 
     def get_skl_estimator(self, **default_parameters):
         return linear_model.LogisticRegression(**default_parameters)
-
-    def hpo():
-        """
-        If multiple fidelities are applicable:
-        (i.e., if it is possible to define substantially cheaper versions 
-        of the objective function of interest, such that the performance 
-        for these roughly correlates with the performance for the full 
-        objective function of  interest)
-            We  recommend  BOHB
-        
-        If multiple fidelities are not applicable:
-            
-        """
-      
+    
 
 # %%
 from sklearn import discriminant_analysis
@@ -493,10 +445,10 @@ from sklearn import discriminant_analysis
 class LDA:          
     def __init__(self, ):
         
-        self.description="""
+        """
         shrinkage='auto' better i guess for all cases, because number 
         of samples and dimentions almost not lower accuracy (see doc)
-                         """     
+        """     
 
         self.name = 'Linear Discriminant Analysis'
         self.short_name = 'LDA'
@@ -504,36 +456,32 @@ class LDA:
         self.scale = None
         
         self.default_parameters={
-            "solver":'svd', "shrinkage":None, "priors":None,
-            "n_components":None, "store_covariance":False, "tol":1e-4
+            "solver":'svd', 
+            "shrinkage":None, 
+            "priors":None,             # no point to tune in HPO
+            "n_components":None,       # no point to tune in HPO
+            "store_covariance":False,  # no point to tune in HPO
+            "tol":1e-4
             }
+                                         
         
-        self.parameters_mandatory_first_check=[
-                self.default_parameters
-                ]    
-                
-        #'priors':None, не нужен
-        #'n_components':None, не нужен
-        #'store_covariance':False, не нужен
         self.search_space = {
         'name':'LDA',
         'model':discriminant_analysis.LinearDiscriminantAnalysis,
         'param': hp.choice('LDA_solver',[
             {                            
-            'solver':hp.choice('LDA_p11', ['lsqr','eigen']),
-            'shrinkage':hp.choice('LDA_p12', [None,'auto',hp.uniform('LDA_p121', 0, 1)]),
-            'tol':None,
+                'solver':hp.choice('LDA_p11', ['lsqr','eigen']),
+                'shrinkage':hp.choice('LDA_p12', [None,'auto',hp.uniform('LDA_p121', 0, 1)]),
+                'tol':None,
             },
             {
-            'solver':'svd',
-            'shrinkage':None,
-            'tol':hp.loguniform('LDA_p26',-10, 0 ),        
+                'solver':'svd',
+                'shrinkage':None,
+                'tol':hp.loguniform('LDA_p26',-10, 0 ),        
             }
             ])
         }
-
             
-
 
     def get_skl_estimator(self, **default_parameters):
         return discriminant_analysis.LinearDiscriminantAnalysis(**default_parameters)
@@ -544,25 +492,22 @@ class LDA:
 class QDA:          
     def __init__(self, ):
         
-        self.description="""
-                         """     
+        """
+        Description
+        """     
 
         self.name = 'Quadratic Discriminant Analysis'
         self.short_name = 'QDA'
         
-        self.scale = None
+        self.default_parameters={
+                "priors":None,                  # no point to tune in HPO
+                "reg_param":0., 
+                "store_covariance":False,       # no point to tune in HPO
+                "tol":1.0e-4,                   # no point to tune in HPO
+            } 
         
-        self.default_parameters={"priors":None, "reg_param":0., 
-            "store_covariance":False, "tol":1.0e-4
-            }
+        self.scale = None # ???
         
-        self.parameters_mandatory_first_check=[
-                self.default_parameters
-                ]    
-        
-        # priors не нужно
-        # store_covariance не нужно
-        # tol не нужно
         self.search_space = {
         'name':'QDA',
         'model':discriminant_analysis.QuadraticDiscriminantAnalysis,
@@ -583,6 +528,10 @@ class SGD:
     def __init__(self, ):
         
         """
+        some examples from ???
+        sgd_loss = hp.pchoice(’loss’, [(0.50, ’hinge’), (0.25, ’log’), (0.25, ’huber’)])
+        sgd_penalty = hp.choice(’penalty’, [’l2’, ’elasticnet’])
+        sgd_alpha = hp.loguniform(’alpha’, low=np.log(1e-5), high=np.log(1) ) 
         """     
 
         self.name = 'SVM with SGD'
@@ -598,12 +547,7 @@ class SGD:
             "power_t":0.5, "early_stopping":False, "validation_fraction":0.1,
             "n_iter_no_change":5, "class_weight":None, "warm_start":False,
             "average":False
-                }
-        
-        self.parameters_mandatory_first_check=[
-                self.default_parameters
-                ]    
-        
+                }          
                 
         self.search_space = {
         'name':'SGD',
@@ -624,9 +568,9 @@ from sklearn import neighbors
 class KNeighbors:          
     def __init__(self, n_rows=1000):
         
-        self.description="""
-        NeighborhoodComponentsAnalysis + KNeighborsClassifier
-                         """     
+        """
+        NeighborhoodComponentsAnalysis + KNeighborsClassifier  # try later
+        """     
 
         self.name = 'K-nearest neighbors classifier'
         self.short_name = 'KNeighbors'
@@ -645,18 +589,14 @@ class KNeighbors:
                 self.default_parameters
                 ]    
         
-        self.parameters_range={
-                "n_neighbors":[1,30]
-                }
-        
         self.hpo_results=[]
         
         self.search_space = {
         'name':'KNeighbors',
         'model':neighbors.KNeighborsClassifier,
         'param': {
-#            "n_neighbors":1+hp.randint('KNeighbors_p1', 50)
-            "n_neighbors":hp.qloguniform('KNeighbors_p1', np.log(0.5), np.log(50.5), 1)
+#            "n_neighbors":1+hp.randint('KNeighbors_p1', 50),
+            "n_neighbors":hp.qloguniform('KNeighbors_p1', np.log(1), np.log(50), 1),
         }
         }
 
@@ -669,8 +609,8 @@ class KNeighbors:
 class NearestCentroid:          
     def __init__(self, ):
         
-        self.description="""
-                         """     
+        """
+        """     
 
         self.name = 'Nearest centroid classifier.'
         self.short_name = 'NearestCentroid'
@@ -704,7 +644,7 @@ from sklearn import gaussian_process
 class GaussianProcess:          
     def __init__(self, ):
         
-        self.description="""
+        """
         from sklearn.gaussian_process.kernels import RBF  # и не только!!
         
         1.0 * RBF(1.0)
@@ -723,17 +663,13 @@ class GaussianProcess:
             "n_restarts_optimizer":0, "max_iter_predict":100,
             "warm_start":False, "copy_X_train":True, "random_state":None,
             "multi_class":"one_vs_rest", "n_jobs":None
-            }
-        
-        self.parameters_mandatory_first_check=[
-                self.default_parameters
-                ]    
+        }
         
                
         self.search_space = {
-        'name':'GaussianProcess',
-        'model':gaussian_process.GaussianProcessClassifier,
-        'param': None
+            'name':'GaussianProcess',
+            'model':gaussian_process.GaussianProcessClassifier,
+            'param': None
         }
 
     def get_skl_estimator(self, **default_parameters):
@@ -750,8 +686,9 @@ from sklearn import naive_bayes
 class BernoulliNB:          
     def __init__(self, ):
         
-        self.description="""
-                         """     
+        """
+        Description
+        """     
 
         self.name = 'Naive Bayes classifier for multivariate Bernoulli models'
         self.short_name = 'BernoulliNB'
@@ -759,21 +696,17 @@ class BernoulliNB:
         self.scale = None
         
         self.default_parameters={
-                "alpha":1.0, "binarize":.0,
-                "fit_prior":True, "class_prior":None
-                }
-        
-        self.parameters_mandatory_first_check=[
-                self.default_parameters
-                ]    
-        
-        self.hpo_results=[]
-        
+            "alpha":1.0, 
+            "binarize":.0,
+            "fit_prior":True, 
+            "class_prior":None
+        }   
+               
         
         self.search_space = {
-        'name':'BernoulliNB',
-        'model':naive_bayes.BernoulliNB,
-        'param':None
+            'name':'BernoulliNB',
+            'model':naive_bayes.BernoulliNB,
+            'param':None
         }
 
     def get_skl_estimator(self, **default_parameters):
@@ -785,8 +718,9 @@ class BernoulliNB:
 class GaussianNB:          
     def __init__(self, ):
         
-        self.description="""
-                         """     
+        """
+        Description
+        """     
 
         self.name = 'Gaussian Naive Bayes'
         self.short_name = 'GaussianNB'
@@ -794,22 +728,9 @@ class GaussianNB:
         self.scale = None
         
         self.default_parameters={
-                "priors":None, "var_smoothing":1e-9
-                }
-        
-        self.parameters_mandatory_first_check=[
-                #{'C':1.0, 'kernel':'rbf', 'gamma':0.0001},
-                #{'C':1.0, 'kernel':'sigmoid', 'gamma':0.0001},
-                self.default_parameters
-                ]    
-        
-        self.parameters_range={
-                    #'gamma':[2**-15,2**3],
-                    #'C'    :[2**-5,2**15]
-                }
-        
-        self.hpo_results=[]
-        
+                "priors":None, 
+                "var_smoothing":1e-9
+                }              
         
         self.search_space = {
         'name':'GaussianNB',
@@ -820,9 +741,6 @@ class GaussianNB:
     def get_skl_estimator(self, **default_parameters):
         return naive_bayes.GaussianNB(**default_parameters)
 
-    def hpo():
-        """
-        """
 
 # %%
         
@@ -836,8 +754,9 @@ from sklearn import tree
 class DecisionTree:          
     def __init__(self, ):
         
-        self.description="""
-                         """     
+        """
+        Description
+        """     
 
         self.name = 'Decision tree classifier'
         self.short_name = 'DecisionTree'
@@ -845,25 +764,22 @@ class DecisionTree:
         self.scale = None
         
         self.default_parameters={
-        "criterion":"gini",
-        "splitter":"best",
-        "max_depth":None,
-        "min_samples_split":2,
-        "min_samples_leaf":1,
-        "min_weight_fraction_leaf":0.,
-        "max_features":None,
-        "random_state":None,
-        "max_leaf_nodes":None,
-        "min_impurity_decrease":0.,
-        "min_impurity_split":None,
-        "class_weight":None,
-        "presort":'deprecated',
-        "ccp_alpha":0.0
+            "criterion":"gini",
+            "splitter":"best",
+            "max_depth":None,
+            "min_samples_split":2,
+            "min_samples_leaf":1,
+            "min_weight_fraction_leaf":0.,
+            "max_features":None,
+            "random_state":None,
+            "max_leaf_nodes":None,
+            "min_impurity_decrease":0.,
+            "min_impurity_split":None,
+            "class_weight":None,
+            "presort":'deprecated',
+            "ccp_alpha":0.0
         }
         
-        self.parameters_mandatory_first_check=[
-                self.default_parameters
-                ]    
         
         self.search_space = {
         'name':'DecisionTree',
@@ -893,7 +809,7 @@ from sklearn import ensemble
 class BaggingSVC: # только Bagging только SVC(kernel=rbf)
     def __init__(self, ):
         
-        self.description="""
+        """
         base_estimator= указать нужный
         
         
@@ -921,25 +837,20 @@ class BaggingSVC: # только Bagging только SVC(kernel=rbf)
         self.name = 'Bagging classifier'
         self.short_name = 'Bagging(SVС)'
         
-
-        
         self.default_parameters={
-        "base_estimator":None,
-        "n_estimators":10,
-        "max_samples":1.0,
-        "max_features":1.0,
-        "bootstrap":True,
-        "bootstrap_features":False,
-        #"oob_score":False,
-        #"warm_start":False,
-        #"n_jobs":None,
-        #"random_state":None,
-        #"verbose":0
+            "base_estimator":None,
+            "n_estimators":10,
+            "max_samples":1.0,
+            "max_features":1.0,
+            "bootstrap":True,
+            "bootstrap_features":False,
+            #"oob_score":False,
+            #"warm_start":False,
+            #"n_jobs":None,
+            #"random_state":None,
+            #"verbose":0
         }
         
-        self.parameters_mandatory_first_check=[
-                self.default_parameters
-                ]    
              
         # Gausian kernel (RBF)
         # Baggging LibSVM w
@@ -972,8 +883,7 @@ class BaggingSVC: # только Bagging только SVC(kernel=rbf)
 class RandomForest:          
     def __init__(self, ):
         
-        self.description="""
-             
+        """            
         Random forest Hyperparameters range:
             
         Whether to train on bootstrap samples or on the full train set.
@@ -1029,10 +939,7 @@ class RandomForest:
         "ccp_alpha":0.0,
         "max_samples":None
         }
-        
-        self.parameters_mandatory_first_check=[
-                self.default_parameters
-                ]    
+         
         
         self.parameters_range={
                     'max_features':[0.1, 0.9],
@@ -1040,7 +947,6 @@ class RandomForest:
                     'bootstrap':[True, False] #!!! choise not range
                 }
         
-        self.hpo_results=[]
         
         self.search_space = {
         'name':'RandomForest',
@@ -1061,9 +967,9 @@ class RandomForest:
 class xRandTrees:          
     def __init__(self, ):
         
-        self.description="""
+        """
         Extrimly randomised trees
-                         """     
+        """     
 
         self.name = 'Extra-trees classifier'
         self.short_name = 'xRandTrees'
@@ -1071,30 +977,26 @@ class xRandTrees:
         self.scale = None
         
         self.default_parameters={
-        "n_estimators":100,
-        "criterion":"gini",
-        "max_depth":None,
-        "min_samples_split":2,
-        "min_samples_leaf":1,
-        "min_weight_fraction_leaf":0.,
-        "max_features":"auto",
-        "max_leaf_nodes":None,
-        "min_impurity_decrease":0.,
-        "min_impurity_split":None,
-        "bootstrap":False,
-        "oob_score":False,
-        "n_jobs":None,
-        "random_state":None,
-        "verbose":0,
-        "warm_start":False,
-        "class_weight":None,
-        "ccp_alpha":0.0,
-        "max_samples":None
+            "n_estimators":100,
+            "criterion":"gini",
+            "max_depth":None,
+            "min_samples_split":2,
+            "min_samples_leaf":1,
+            "min_weight_fraction_leaf":0.,
+            "max_features":"auto",
+            "max_leaf_nodes":None,
+            "min_impurity_decrease":0.,
+            "min_impurity_split":None,
+            "bootstrap":False,
+            "oob_score":False,
+            "n_jobs":None,
+            "random_state":None,
+            "verbose":0,
+            "warm_start":False,
+            "class_weight":None,
+            "ccp_alpha":0.0,
+            "max_samples":None
         }
-        
-        self.parameters_mandatory_first_check=[
-                self.default_parameters
-                ]           
         
         
         self.search_space = {
@@ -1116,8 +1018,7 @@ class xRandTrees:
 class AdaBoost:          
     def __init__(self, ):
         
-        self.description="""                
-        
+        """                       
         maximal depth of the decision tree and, to a lesser degree, the learning rate.
         One interesting observation is that, in contrast to other 
         ensembletechniques, the number of iterations did not seem to 
@@ -1146,9 +1047,9 @@ class AdaBoost:
                 ]    
         
         self.parameters_range={
-        "learning_rate":[0.01,2.0], # (log-scale)
-        "base_estimator":DecisionTree().get_skl_estimator(
-        max_depth=[1,10]) # !!! как тут быть? nested? (10 optimal maybe need more)
+            "learning_rate":[0.01,2.0], # (log-scale)
+            "base_estimator":DecisionTree().get_skl_estimator(
+            max_depth=[1,10]) # !!! как тут быть? nested? (10 optimal maybe need more)
         }
         
         self.hpo_results=[]
@@ -1163,7 +1064,7 @@ class AdaBoost:
                  "model":tree.DecisionTreeClassifier,
                  "max_depth":1+hp.randint('AdaBoost_p2', 12)
                           }
-         }
+                }
         }
 
     def get_skl_estimator(self, **default_parameters):
@@ -1177,7 +1078,7 @@ from sklearn.experimental import enable_hist_gradient_boosting
 class HistGB:          
     def __init__(self, ):
         
-        self.description="""
+        """
         # https://github.com/microsoft/LightGBM/blob/master/examples/python-guide/sklearn_example.py
         # лучше заменить на lightgbm
         
@@ -1195,16 +1096,22 @@ class HistGB:
         self.scale = None
         
         self.default_parameters={
-        "loss":'auto', "learning_rate":0.1, "max_iter":100,
-        "max_leaf_nodes":31, "max_depth":None, "min_samples_leaf":20,
-        "l2_regularization":0., "max_bins":255, "warm_start":False,
-        "scoring":None, "validation_fraction":0.1, "n_iter_no_change":None,
-        "tol":1e-7, "verbose":0, "random_state":None
+            "loss":'auto', 
+            "learning_rate":0.1, 
+            "max_iter":100,
+            "max_leaf_nodes":31, 
+            "max_depth":None, 
+            "min_samples_leaf":20,
+            "l2_regularization":0., 
+            "max_bins":255, 
+            "warm_start":False,
+            "scoring":None, 
+            "validation_fraction":0.1, 
+            "n_iter_no_change":None,
+            "tol":1e-7, 
+            "verbose":0, 
+            "random_state":None
         }
-        
-        self.parameters_mandatory_first_check=[
-                self.default_parameters
-                ]    
         
         
         self.search_space = {
@@ -1236,8 +1143,9 @@ I'm not sure should i use it if there are no not labeled data
 class LabelSpreading:          
     def __init__(self, ):
         
-        self.description="""
-                         """     
+        """
+        Description
+        """     
 
         self.name = 'LabelSpreading semi-supervised'
         self.short_name = 'LabelSpreading'
@@ -1279,11 +1187,10 @@ from sklearn import neural_network
 class MLP:        
     def __init__(self, ):
         
-        self.description="""
+        """
         sometimes CV train takes a long time
         
         # all they heavy        
-
         models.append(('MLP', MLPClassifier())) 
         models.append(('ScaledMLP', ScaledMLP)) 
         models.append(('PolynomialFeaturesMLP', PolynomialFeaturesMLP)) 
@@ -1360,10 +1267,7 @@ class DBN:
         "dropout_p":0, # float between 0 and 1.
         "verbose":False
         }
-        
-        self.parameters_mandatory_first_check=[
-                self.default_parameters
-                ]         
+            
         
         self.search_space = {
         'name':'DBN',
@@ -1394,24 +1298,32 @@ class FactorizationMachine:
         
         
         self.default_parameters={
-        "degree":2, "loss":'squared_hinge', "n_components":2, "alpha":1,
-        "beta":1, "tol":1e-6, "fit_lower":'explicit', "fit_linear":True,
-        "warm_start":False, "init_lambdas":'ones', "max_iter":10000,
-        "verbose":False, "random_state":None
+            "degree":2, 
+            "loss":'squared_hinge', 
+            "n_components":2, 
+            "alpha":1,
+            "beta":1, 
+            "tol":1e-6, 
+            "fit_lower":'explicit', 
+            "fit_linear":True,
+            "warm_start":False, 
+            "init_lambdas":'ones', 
+            "max_iter":10000,
+            "verbose":False, 
+            "random_state":None
         }
         
         self.parameters_mandatory_first_check=[
                 {"n_components":1},
                 {"n_components":2},
                 {"n_components":3}
-#                self.default_parameters
-                ]    
+        ]    
         
         
         self.search_space = {
-        'name':'FactorizationMachine',
-        'model':polylearn.FactorizationMachineClassifier,
-        'param': None
+            'name':'FactorizationMachine',
+            'model':polylearn.FactorizationMachineClassifier,
+            'param': None
         }
 
     def get_skl_estimator(self, **default_parameters):
@@ -1443,11 +1355,6 @@ class PolynomialNetwork:
                 {"degree":3}
             ]    
         
-        self.parameters_range={
-                    #'gamma':[2**-15,2**3],
-                }
-        
-        self.hpo_results=[]
         
         self.search_space = {
         'name':'PolynomialNetwork',
@@ -1466,7 +1373,7 @@ import elm
 class ELM:          
     def __init__(self, ):
         
-        self.description="""
+        """
         http://mblondel.org/publications/mblondel-icml2016.pdf
         
         very fast and good accuracy
@@ -1477,29 +1384,26 @@ class ELM:
         self.short_name = 'ELM'    
      
         self.default_parameters={
-        "hid_num":10,
-        "a":1   
+            "hid_num":10,
+            "a":1   
         }
-      
-        self.parameters_mandatory_first_check=[
-            self.default_parameters
-            ]    
+       
         
         self.scale = None  
         self.search_space = {
-        'name':'ELM',
-        'model':elm.ELM,
-        'param':{
-            'hid_num':hp.qloguniform('ELM_p1', np.log(1), np.log(1500), 1),
-            'a':hp.loguniform('ELM_p2', -12, 6),         
-            }
+            'name':'ELM',
+            'model':elm.ELM,
+            'param':{
+                'hid_num':hp.qloguniform('ELM_p1', np.log(1), np.log(1500), 1),
+                'a':hp.loguniform('ELM_p2', -12, 6),         
+                }
         }
 
     def get_skl_estimator(self, **default_parameters):
         return elm.ELM(hid_num=10)#(**default_parameters)
 
 
-# %%                    # нужен вообще? 
+# %%                    ??? 
         
 """       
 from sklearn import dummy 
