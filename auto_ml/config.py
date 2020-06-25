@@ -88,7 +88,8 @@ default_config = {
                             'CD_abs_path':None,
                         },
                         
-                    'global_variables': #TODO move to glob_var.pickle?
+                    # currently UNUSED
+                    'global_variables': #TODO move to glob_var.pickle? 
                         {                        
                             'DS_name':None,
                             'DS_type':None, # csv,  #TODO excel
@@ -140,12 +141,12 @@ def load_config(): # load_path
 
 # %%
 
-def save_config(config_dict): # save_path=None  file_name=None
+def save_config(config_dict, save_path = config_name): 
     """
     Function saves dict as json file to disk
     """
-    with open(config_name, 'w') as fp:  
-        json.dump(config_dict, fp, indent=4)  
+    with open(save_path, 'w') as fp:  
+        json.dump(config_dict, fp, indent=4)      
     
 # %%
           
@@ -180,9 +181,9 @@ def paths_selected():
     conf = load_config()
     DS, CD = True, True
     if(conf['paths']['DS_abs_path'] == None):
-        DS=False
+        DS = False
     if(conf['paths']['CD_abs_path'] == None):
-        CD=False
+        CD = False
         
     return DS, CD
 
@@ -195,7 +196,10 @@ def paths_selected():
 if __name__ == "__main__":
     from pprint import pprint
     pprint(load_config())
-
-
-
-
+    
+    # cfg = load_config()
+    # save_config(cfg, 'experiment_1'+'\\conf2.json')   
+    # save_config(cfg,r'C:\Users\dosto\Dropbox\2. Software\main_dev\ffh\cfg.json')
+    # save_config(cfg)
+    
+    

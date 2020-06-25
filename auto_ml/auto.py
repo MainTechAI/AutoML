@@ -87,6 +87,8 @@ class ModelSelection:
         
         self.search()
         
+        self.save_n_best_on_disk()
+        
         print('!end!')         
 
 # %%      
@@ -373,9 +375,7 @@ class ModelSelection:
                 if( res['status']=='ok'):
                     results.append( (res['accuracy'],res['model'],res['model_name'],res['model_memory'],res['prediction_time'],res['train_time']) )     
             
-            self.optimal_results = results
-    
-            self.save_n_best_on_disk()                
+            self.optimal_results = results                
     
 # %%    
             
@@ -434,12 +434,31 @@ class ModelSelection:
             self.results_excel.sort_values(by='accuracy', ascending=False,inplace=True)
             self.results_excel.to_excel(self.experiment_name+"\\"+self.experiment_name+"_results.xlsx")
         
-        if(save_config == True):
-            pass
-            #TODO also save all experiment settings in JSON
+        if(save_config == True):         
+            import config
+            cfg = config.default_config.copy()
+            
+            # need because when use api you don't have default config.json  
+            cfg['task'] = 'classification'        
+            cfg['experiment_name'] = self.experiment_name          
+            cfg['model_requirements']['min_accuracy'] = self.min_accuracy
+            cfg['model_requirements']['max_memory'] = self.max_model_memory
+            cfg['model_requirements']['max_single_predict_time'] = self.max_prediction_time
+            cfg['model_requirements']['max_train_time'] = self.max_train_time        
+            cfg['search_space'] = self.used_algorithms         
+            cfg['search_options']['duration'] = self.duration
+            cfg['search_options']['iterations'] = self.iterations
+            cfg['search_options']['metric'] = self.metric
+            cfg['search_options']['validation'] = self.validation
+            cfg['search_options']['saved_top_models_amount'] = self.saved_models_count     
+            cfg['paths']['DS_abs_path'] = None
+            cfg['paths']['CD_abs_path'] = None                
+            
+            config.save_config(cfg, self.experiment_name+'\\config.json')
+
         
-#['accuracy']['model']['model_name']['model_memory']['prediction_time']['train_time'] 
-   
+#['accuracy']['model']['model_name']['model_memory']['prediction_time']['train_time']               
+        
     
 # %%   #################################################################   
  

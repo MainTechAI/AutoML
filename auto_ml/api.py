@@ -38,7 +38,7 @@ ModelSelection(
                DS = DS, # TODO to numpy
                CD = CD, # TODO change to dict? cat_col=[3,4], num_col=[1,2,5]
                experiment_name = 'experiment_api_test', 
-               duration = 240, 
+               duration = 40, 
                min_accuracy = 65.0,
                max_model_memory = 1048576, 
                max_prediction_time = 40, 
@@ -47,5 +47,5 @@ ModelSelection(
                metric = 'accuracy', 
                validation = '10 fold CV', 
                saved_models_count = 'All',
-               iterations = 100,
+               iterations = 60,
                )
