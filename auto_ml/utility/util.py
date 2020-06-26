@@ -22,7 +22,7 @@ from sklearn.model_selection._split import check_cv
 
 import pickle
 import sys
-import pandas as pd  
+import pandas as pd
 
 
 
@@ -35,48 +35,48 @@ __all__ = ['cross_validate', 'cross_val_score', 'split_val_score']
 
 def split_val_score(estimator, X_train, X_test, Y_train, Y_test, scoring):
     full_time_start = time.perf_counter()
-    
+
     scorer = check_scoring(estimator, scoring=scoring)
-    
+
     results={}
-    
+
     fit_time_start = time.perf_counter()
     estimator.fit(X_train,Y_train)
     results['fit_time']=time.perf_counter()-fit_time_start
-    
-    
+
+
     p = pickle.dumps(estimator)
     results['memory_fited']= sys.getsizeof(p) #in bytes
-    
-    
-    
+
+
+
     score_time_start=time.perf_counter()
 #    Y_pred=estimator.predict(X_test)
 #    if(metrics=='accuracy'): #??? протестировать
-#        from sklearn.metrics import accuracy_score  
-#        results['test_score']=accuracy_score(Y_test, Y_pred)    
+#        from sklearn.metrics import accuracy_score
+#        results['test_score']=accuracy_score(Y_test, Y_pred)
     results['test_score'] = _score(estimator, X_test, Y_test, scorer)
     results['score_time'] = time.perf_counter()-score_time_start
-    
-    
-    
+
+
+
     #TODO переделать без костылей
-    #for numpy 
+    #for numpy
     if(isinstance(X_test, np.ndarray)):
         inf_example=X_test[0].reshape(1, -1)
-    
+
     #for DataFrame
     if(isinstance(X_test, pd.DataFrame)):
         inf_example=X_test.iloc[0].to_numpy().reshape(1, -1)
-    
-    
-    
-    
+
+
+
+
     inference_time_start=time.perf_counter()
     s=estimator.predict(inf_example)
     results['inference_time']=time.perf_counter()-inference_time_start
-    
-    
+
+
     results['full_time']= time.perf_counter()-full_time_start
     return results
 
@@ -88,7 +88,7 @@ def cross_validate(estimator, X, y=None, groups=None, scoring=None, cv=None,
                    n_jobs=None, verbose=0, fit_params=None,
                    pre_dispatch='2*n_jobs', return_train_score=False,
                    return_estimator=False, error_score=np.nan):
-    
+
     X, y, groups = indexable(X, y, groups)
 
     cv = check_cv(cv, y, classifier=is_classifier(estimator))
@@ -120,8 +120,8 @@ def cross_validate(estimator, X, y=None, groups=None, scoring=None, cv=None,
     ret['inference_time'] = np.array(inference_times)
     ret['memory_fited'] = np.array(memory)
     ret['total_time'] = np.array(total_times)
-    
-    
+
+
     if return_estimator:
         ret['estimator'] = fitted_estimators
 
@@ -144,7 +144,7 @@ def cross_validate(estimator, X, y=None, groups=None, scoring=None, cv=None,
 def cross_val_score(estimator, X, y=None, groups=None, scoring=None, cv=None,
                     n_jobs=None, verbose=0, fit_params=None,
                     pre_dispatch='2*n_jobs', error_score=np.nan):
-   
+
     # To ensure multimetric format is not supported
     scorer = check_scoring(estimator, scoring=scoring)
 
@@ -154,8 +154,8 @@ def cross_val_score(estimator, X, y=None, groups=None, scoring=None, cv=None,
                                 fit_params=fit_params,
                                 pre_dispatch=pre_dispatch,
                                 error_score=error_score)
-    
-    
+
+
     return cv_results
 
 
@@ -174,7 +174,7 @@ def _fit_and_score(estimator, X, y, scorer, train, test, verbose,
                    return_parameters=False, return_n_test_samples=False,
                    return_times=True, return_estimator=False,
                    error_score=np.nan):
-    
+
     if verbose > 1:
         if parameters is None:
             msg = ''
@@ -202,9 +202,9 @@ def _fit_and_score(estimator, X, y, scorer, train, test, verbose,
 
     X_train, y_train = _safe_split(estimator, X, y, train)
     X_test, y_test = _safe_split(estimator, X, y, test, train)
-    
-    
-    
+
+
+
     try:
         if y_train is None:
             estimator.fit(X_train, **fit_params)
@@ -240,10 +240,10 @@ def _fit_and_score(estimator, X, y, scorer, train, test, verbose,
     else:
         fit_time = time.perf_counter() - start_time
         test_scores = _score(estimator, X_test, y_test, scorer)
-        
-        
 
-        
+
+
+
         score_time = time.perf_counter() - start_time - fit_time
         if return_train_score:
             train_scores = _score(estimator, X_train, y_train, scorer)
@@ -266,25 +266,25 @@ def _fit_and_score(estimator, X, y, scorer, train, test, verbose,
         print(_message_with_time('CV', msg, total_time))
 
     ret = [train_scores, test_scores] if return_train_score else [test_scores]
-    
-    
+
+
     p = pickle.dumps(estimator)
     mem=sys.getsizeof(p) #in bytes
-    
-    
+
+
     #TODO переделать без костылей
-    #for numpy 
+    #for numpy
     if(isinstance(X_test, np.ndarray)):
         inf_example=X_test[0].reshape(1, -1)
-    
+
     #for DataFrame
     if(isinstance(X_test, pd.DataFrame)):
         inf_example=X_test.iloc[0].to_numpy().reshape(1, -1)
-    #Reshape your data either using array.reshape(-1, 1) 
-    #if your data has a single feature or array.reshape(1, -1) if it contains 
+    #Reshape your data either using array.reshape(-1, 1)
+    #if your data has a single feature or array.reshape(1, -1) if it contains
     #a single sample.
-    
-    
+
+
     inference_time_start=time.perf_counter()
     s=estimator.predict(inf_example)
     inference_time_end=time.perf_counter()

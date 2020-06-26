@@ -15,7 +15,7 @@ import config
 
 
 """
-from .ui to .py  
+from .ui to .py
 pyuic5 -o pyfilename.py design.ui
  -x executable  if __name__ == "__main__":
 """
@@ -25,44 +25,44 @@ import time
 from PyQt5.QtCore import pyqtSlot, pyqtSignal, QThread #QRunnable
 
 class TimerThread(QThread):
-    
+
     signal_timer = pyqtSignal(int)
     signal_timer_finish = pyqtSignal()
-       
+
     @pyqtSlot(int)
     def slot_timer_start(self,value):
         self.seconds=value
-        print("Start value:",value)   
-    
-    def run(self): 
+        print("Start value:",value)
+
+    def run(self):
         count = self.seconds
         while count > 0:
             time.sleep(1)
             count -= 1
             #print("seconds remaining",count)
             self.signal_timer.emit(count)
-        self.signal_timer_finish.emit()       
-        
-        
+        self.signal_timer_finish.emit()
+
+
 # %%
 
 import auto
-  
+
 class ModelSeletionThread(QThread):
-    
-    signal_model_selection_finish = pyqtSignal()       
-      
-    def run(self): 
-        
+
+    signal_model_selection_finish = pyqtSignal()
+
+    def run(self):
+
         cfg=config.load_config()
-        
+
         DS_path = cfg['paths']['DS_abs_path']
-        CD_path = cfg['paths']['CD_abs_path']            
-        
+        CD_path = cfg['paths']['CD_abs_path']
+
         # MS=
         auto.ModelSelection(
                 load_DS_as_df(DS_path).values, #!!! load as df then to numpy
-                load_CD_as_list(CD_path), 
+                load_CD_as_list(CD_path),
                 cfg['experiment_name'],
                 cfg['search_options']['duration'],
                 cfg['model_requirements']['min_accuracy'],
@@ -75,13 +75,13 @@ class ModelSeletionThread(QThread):
                 cfg['search_options']['saved_top_models_amount'], # TODO change API
                 cfg['search_options']['iterations']
                             )
-                
+
         # публичный метод по этому можешь вызвать
         #MS.fit(5) # можно отсюда управлять
-        
-        print("ModelSeletionThread finish")     
+
+        print("ModelSeletionThread finish")
         self.signal_model_selection_finish.emit()
-        
+
 
 # %%
 
@@ -89,25 +89,25 @@ class ModelSeletionThread(QThread):
 # %%
 class Ui_MainWindow(QMainWindow):
     signal_start_timer = pyqtSignal(int)
-    
-    def __init__(self):   
-        super(Ui_MainWindow, self).__init__()      
-        
+
+    def __init__(self):
+        super(Ui_MainWindow, self).__init__()
+
         self.lcd_bool = True
-        
+
         self.dialog_settings = Ui_Dialog()
         self.warning_paths = Ui_WarningPaths()
         self.warning_name = Ui_WarningName()
-        
+
         self.warning_models = Ui_WarningModels()
-        
+
         self.setupUi()
-        
-       
-    
+
+
+
     def setupUi(self):
         cfg = config.load_config()
-        
+
         self.setObjectName("MainWindow")
         self.setEnabled(True)
         self.resize(320, 480)
@@ -161,7 +161,7 @@ class Ui_MainWindow(QMainWindow):
         self.spinBox_all_time.setMaximum(100000000)
         self.spinBox_all_time.setSingleStep(100)
 #        self.spinBox_all_time.setStepType(QtWidgets.QAbstractSpinBox.AdaptiveDecimalStepType)
-        self.spinBox_all_time.setProperty("value", cfg['search_options']['duration']) 
+        self.spinBox_all_time.setProperty("value", cfg['search_options']['duration'])
         self.spinBox_all_time.setObjectName("spinBox_all_time")
         self.label_5 = QtWidgets.QLabel(self.new_experiment)
         self.label_5.setGeometry(QtCore.QRect(20, 170, 170, 30))
@@ -254,8 +254,8 @@ class Ui_MainWindow(QMainWindow):
         self.spinBox_min_accuracy.setProperty("value", cfg['model_requirements']['min_accuracy'])
 #        self.spinBox_min_accuracy.setDisplayIntegerBase(10)
         self.spinBox_min_accuracy.setObjectName("spinBox_min_accuracy")
-        
-        
+
+
         self.label_7 = QtWidgets.QLabel(self.new_experiment)
         self.label_7.setGeometry(QtCore.QRect(20, 250, 170, 30))
         self.label_7.setWordWrap(True)
@@ -269,9 +269,9 @@ class Ui_MainWindow(QMainWindow):
 #        self.spinBox_all_time_2.setStepType(QtWidgets.QAbstractSpinBox.AdaptiveDecimalStepType)
         self.spinBox_all_time_2.setProperty("value", cfg['model_requirements']['max_train_time'])
         self.spinBox_all_time_2.setObjectName("spinBox_all_time_2")
-        
+
         #######
-        
+
         self.label_9 = QtWidgets.QLabel(self.new_experiment)
         self.label_9.setGeometry(QtCore.QRect(20, 280, 170, 30))
         self.label_9.setWordWrap(True)
@@ -284,9 +284,9 @@ class Ui_MainWindow(QMainWindow):
         self.spinBox_iter.setSingleStep(50)
         self.spinBox_iter.setProperty("value", cfg['search_options']['iterations'])
         self.spinBox_iter.setObjectName("spinBox_iter")
-        
+
         ########
-        
+
         self.search = QtWidgets.QFrame(self.centralwidget)
         self.search.setEnabled(True)
         self.search.setGeometry(QtCore.QRect(10, 10, 301, 431))
@@ -322,19 +322,19 @@ class Ui_MainWindow(QMainWindow):
         self.btn_goto_menu.setEnabled(False)
         self.btn_goto_menu.setGeometry(QtCore.QRect(110, 240, 71, 23))
         self.btn_goto_menu.setObjectName("btn_goto_menu")
-        
+
         self.label = QtWidgets.QLabel(self.search)
         self.label.setGeometry(QtCore.QRect(20, 130, 261, 71))
         self.label.setAlignment(QtCore.Qt.AlignCenter)
         self.label.setWordWrap(True)
         self.label.setObjectName("label")
-        
+
         self.label_8 = QtWidgets.QLabel(self.search)
         self.label_8.setGeometry(QtCore.QRect(20, 160, 261, 71))
         self.label_8.setAlignment(QtCore.Qt.AlignCenter)
         self.label_8.setWordWrap(True)
         self.label_8.setObjectName("label_8")
-        
+
         self.menu = QtWidgets.QFrame(self.centralwidget)
         self.menu.setEnabled(True)
         self.menu.setGeometry(QtCore.QRect(10, 10, 301, 431))
@@ -443,30 +443,30 @@ class Ui_MainWindow(QMainWindow):
         # connect
         self.retranslateUi(self)
         self.btn_menu_search.clicked.connect(self.new_experiment.raise_)
-        self.btn_menu_exit.clicked.connect(sys.exit)        
+        self.btn_menu_exit.clicked.connect(sys.exit)
         self.btnStart.clicked.connect(self.start_selection)   # start
         self.btn_exp_back.clicked.connect(self.menu.raise_)
-                
+
         # защита от повторного нажатия после перезахода
         self.btn_goto_menu.clicked.connect( self.btn_goto_menu.setEnabled)
         self.btn_goto_menu.clicked.connect(self.menu.raise_)
-        
-        
+
+
         self.btnLoadDataset.clicked.connect(self.load_dataset_dialog)
         self.btnLoadColumnsDescription.clicked.connect(self.load_column_description_dialog)
-        
+
         # Доп. настройки
         self.btn_settings.clicked.connect(self.dialog_settings.show)
-        
+
         QtCore.QMetaObject.connectSlotsByName(self)
-        
+
         self.show()
 
-# %% 
+# %%
 
     def retranslateUi(self, MainWindow): # in russian
         cfg = config.load_config()
-        
+
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "AutoML"))
         self.label_4.setText(_translate("MainWindow", "New experiment"))
@@ -494,52 +494,52 @@ class Ui_MainWindow(QMainWindow):
         self.btnLoadColumnsDescription_2.setText(_translate("MainWindow", "Load"))
         self.btnLoadDataset_2.setText(_translate("MainWindow", "Load"))
         self.pushButton_10.setText(_translate("MainWindow", "Back"))
-        self.pushButtonNext1_6.setText(_translate("MainWindow", "Make prediction")) #!!!  
-        self.btnSettings_4.setText(_translate("MainWindow", "Testing")) #!!!   
+        self.pushButtonNext1_6.setText(_translate("MainWindow", "Make prediction")) #!!!
+        self.btnSettings_4.setText(_translate("MainWindow", "Testing")) #!!!
         self.label_9.setText(_translate("MainWindow", "Max iterations"))
-      
+
 # %%
-     
+
     def load_dataset_dialog(self):
         fileDlg = QFileDialog(self)
         #fileDlg.setDirectory('./')
-        fileDlg.setDirectory(expanduser("~")) 
+        fileDlg.setDirectory(expanduser("~"))
         #Nikon (*.nef;*.nrw);;Sony (*.arw;*.srf;*.sr2);;All Files (*.*)
         fpath = fileDlg.getOpenFileName(filter="Dataset (*.csv)")[0] #;;Excel (*.xlsx)
         fpath=os.path.normpath(fpath)
         #print('Dataset path:',fpath) #!!! DEBUG
-        
+
         # if DS file exist
         if os.path.isfile(fpath):
             #config.handle_dataset_path(fpath)
-            cfg = config.load_config()       
+            cfg = config.load_config()
             cfg['paths']['DS_abs_path'] = fpath
             config.save_config(cfg)
-            
+
             _translate = QtCore.QCoreApplication.translate
             self.btnLoadDataset.setText(_translate("MainWindow", "Loaded"))
             font = QtGui.QFont()
             font.setUnderline(False)
-            self.btnLoadDataset.setFont(font)            
-        
+            self.btnLoadDataset.setFont(font)
+
 # %%
-        
-    def load_column_description_dialog(self):      
+
+    def load_column_description_dialog(self):
         fileDlg = QFileDialog(self)
         #fileDlg.setDirectory('./')
         fileDlg.setDirectory(expanduser("~"))
         #Nikon (*.nef;*.nrw);;Sony (*.arw;*.srf;*.sr2);;All Files (*.*)
         fpath = fileDlg.getOpenFileName(filter="Column description (*.csv)")[0]
-        fpath=os.path.normpath(fpath)        
+        fpath=os.path.normpath(fpath)
         #print('Columns description file path:',fpath) #!!! DEBUG
-        
+
         #if CD file exist
         if os.path.isfile(fpath):
             #config.handle_column_description_path(fpath)
-            cfg = config.load_config()            
-            cfg['paths']['CD_abs_path'] = fpath  
+            cfg = config.load_config()
+            cfg['paths']['CD_abs_path'] = fpath
             config.save_config(cfg)
-            
+
             _translate = QtCore.QCoreApplication.translate
             self.btnLoadColumnsDescription.setText(_translate("MainWindow", "Loaded"))
             font = QtGui.QFont()
@@ -551,68 +551,68 @@ class Ui_MainWindow(QMainWindow):
         if checkbox.checkState()==2:
             return True
         elif checkbox.checkState()==0:
-            return False    
-               
-        
+            return False
+
+
     def load_settings_from_gui(self): # in config.json
-        
+
         self.lcd_bool = True  # TODO fix
-        
+
         cfg = config.load_config()
-        
+
         cfg['experiment_name'] = self.lineEdit_experiment_name.text()
-        
+
         cfg['model_requirements']['min_accuracy'] = self.spinBox_min_accuracy.value()
         cfg['model_requirements']['max_memory'] = self.spinBox_model_max_memory.value()
         cfg['model_requirements']['max_single_predict_time'] = self.spinBox_max_predict_time.value()
         cfg['model_requirements']['max_train_time'] = self.spinBox_all_time_2.value()
-        
+
         cfg['search_options']['duration'] = self.spinBox_all_time.value()
         cfg['search_options']['iterations'] = self.spinBox_iter.value()
         cfg['search_options']['metric'] = self.dialog_settings.comboBox_metric.currentText()
         cfg['search_options']['validation'] = self.dialog_settings.comboBox_validation.currentText() # TODO change API
         cfg['search_options']['saved_top_models_amount'] = self.dialog_settings.comboBox_saved_count.currentText() # TODO change API
-        
+
         cfg['search_space'] = {
-        'AdaBoost':self.checkbox_state(self.dialog_settings.checkBox_AdaBoost), 
-        'XGBoost':self.checkbox_state(self.dialog_settings.checkBox_XGBoost ), 
-        'Bagging(SVC)':self.checkbox_state(self.dialog_settings.checkBox_BaggingSVC ), 
-        'MLP':self.checkbox_state(self.dialog_settings.checkBox_MLP ), 
-        'HistGB':self.checkbox_state(self.dialog_settings.checkBox_HistGB ), 
-        'Ridge':self.checkbox_state(self.dialog_settings.checkBox_Ridge ), 
-        'LinearSVC':self.checkbox_state(self.dialog_settings.checkBox_LinearSVC ), 
-        'PassiveAggressive':self.checkbox_state(self.dialog_settings.checkBox_PassiveAggressive ), 
-        'LogisticRegression':self.checkbox_state(self.dialog_settings.checkBox_LogisticRegression ), 
-        'LDA':self.checkbox_state(self.dialog_settings.checkBox_LDA ),  
-        'QDA':self.checkbox_state(self.dialog_settings.checkBox_QDA ), 
-        'Perceptron':self.checkbox_state(self.dialog_settings.checkBox_Perceptron ),      
-        'SVM':self.checkbox_state(self.dialog_settings.checkBox_SVM ), 
-        'RandomForest':self.checkbox_state(self.dialog_settings.checkBox_RandomForest ), 
-        'xRandTrees':self.checkbox_state(self.dialog_settings.checkBox_xRandTrees ), 
-        'ELM':self.checkbox_state(self.dialog_settings.checkBox_ELM ), 
-        'DecisionTree':self.checkbox_state(self.dialog_settings.checkBox_DecisionTree ), 
-        'SGD':self.checkbox_state(self.dialog_settings.checkBox_SGD ), 
-        'KNeighbors':self.checkbox_state(self.dialog_settings.checkBox_KNeighbors ), 
-        'NearestCentroid':self.checkbox_state(self.dialog_settings.checkBox_NearestCentroid ), 
-        'GaussianProcess':self.checkbox_state(self.dialog_settings.checkBox_GaussianProcess ), 
-        'LabelSpreading':self.checkbox_state(self.dialog_settings.checkBox_LabelSpreading ), 
-        'BernoulliNB':self.checkbox_state(self.dialog_settings.checkBox_BernoulliNB ),  
-        'GaussianNB':self.checkbox_state(self.dialog_settings.checkBox_GaussianNB ), 
-        'DBN':self.checkbox_state(self.dialog_settings.checkBox_DBN ),  
-        'FactorizationMachine':self.checkbox_state(self.dialog_settings.checkBox_FactorizationMachine ), 
+        'AdaBoost':self.checkbox_state(self.dialog_settings.checkBox_AdaBoost),
+        'XGBoost':self.checkbox_state(self.dialog_settings.checkBox_XGBoost ),
+        'Bagging(SVC)':self.checkbox_state(self.dialog_settings.checkBox_BaggingSVC ),
+        'MLP':self.checkbox_state(self.dialog_settings.checkBox_MLP ),
+        'HistGB':self.checkbox_state(self.dialog_settings.checkBox_HistGB ),
+        'Ridge':self.checkbox_state(self.dialog_settings.checkBox_Ridge ),
+        'LinearSVC':self.checkbox_state(self.dialog_settings.checkBox_LinearSVC ),
+        'PassiveAggressive':self.checkbox_state(self.dialog_settings.checkBox_PassiveAggressive ),
+        'LogisticRegression':self.checkbox_state(self.dialog_settings.checkBox_LogisticRegression ),
+        'LDA':self.checkbox_state(self.dialog_settings.checkBox_LDA ),
+        'QDA':self.checkbox_state(self.dialog_settings.checkBox_QDA ),
+        'Perceptron':self.checkbox_state(self.dialog_settings.checkBox_Perceptron ),
+        'SVM':self.checkbox_state(self.dialog_settings.checkBox_SVM ),
+        'RandomForest':self.checkbox_state(self.dialog_settings.checkBox_RandomForest ),
+        'xRandTrees':self.checkbox_state(self.dialog_settings.checkBox_xRandTrees ),
+        'ELM':self.checkbox_state(self.dialog_settings.checkBox_ELM ),
+        'DecisionTree':self.checkbox_state(self.dialog_settings.checkBox_DecisionTree ),
+        'SGD':self.checkbox_state(self.dialog_settings.checkBox_SGD ),
+        'KNeighbors':self.checkbox_state(self.dialog_settings.checkBox_KNeighbors ),
+        'NearestCentroid':self.checkbox_state(self.dialog_settings.checkBox_NearestCentroid ),
+        'GaussianProcess':self.checkbox_state(self.dialog_settings.checkBox_GaussianProcess ),
+        'LabelSpreading':self.checkbox_state(self.dialog_settings.checkBox_LabelSpreading ),
+        'BernoulliNB':self.checkbox_state(self.dialog_settings.checkBox_BernoulliNB ),
+        'GaussianNB':self.checkbox_state(self.dialog_settings.checkBox_GaussianNB ),
+        'DBN':self.checkbox_state(self.dialog_settings.checkBox_DBN ),
+        'FactorizationMachine':self.checkbox_state(self.dialog_settings.checkBox_FactorizationMachine ),
         'PolynomialNetwork':self.checkbox_state(self.dialog_settings.checkBox_PolynomialNetwork )
-        }        
-        
+        }
+
         config.save_config(cfg)
 
-# %% 
-        
+# %%
+
     @pyqtSlot(int)
     def slot_timer(self,value):
         if(self.lcd_bool == True):
             self.lcd.display(value)
-        
-        
+
+
     @pyqtSlot()
     def slot_finish(self):
         self.lcd.display(0)
@@ -620,79 +620,79 @@ class Ui_MainWindow(QMainWindow):
 #        self.btn_goto_menu.setEnabled(True)
         #print(self.sender())#тот кто отправил
         #print("Timer stops")
-        
+
     @pyqtSlot()
-    def slot_search_end(self):     
+    def slot_search_end(self):
         self.lcd.display(0)
         self.lcd_bool = False
         self.btn_goto_menu.setEnabled(True)
         _translate = QtCore.QCoreApplication.translate
         self.label.setText(_translate("MainWindow", "Search completed, results saved to:"))
-        
-        
-        
-         
-    def start_timer(self): 
+
+
+
+
+    def start_timer(self):
         cfg = config.load_config()
-               
+
         self.lcd.display(cfg['search_options']['duration'] )
         timer_thread = TimerThread(self)
 
         #thread.finished.connect(app.exit) #закрыть всё по завершению не уверен
-        timer_thread.signal_timer.connect(self.slot_timer)  
+        timer_thread.signal_timer.connect(self.slot_timer)
         timer_thread.signal_timer_finish.connect(self.slot_finish)
-        
-        self.signal_start_timer.connect(timer_thread.slot_timer_start) 
+
+        self.signal_start_timer.connect(timer_thread.slot_timer_start)
         self.signal_start_timer.emit(cfg['search_options']['duration'] )
-        
-        timer_thread.start()  
-        
-        
+
+        timer_thread.start()
+
+
 # %%
-    
-    def check_models(self):  
-        cfg = config.load_config()       
+
+    def check_models(self):
+        cfg = config.load_config()
         for val in cfg['search_space'].values():
             if(val==True):
-                return True   
+                return True
         return False
-        
-# %%     
-        
-    def start_selection(self): 
-        cfg = config.load_config() # first call      
-        if( (cfg['paths']['DS_abs_path'] != None) and (cfg['paths']['CD_abs_path'] != None) ): 
-              
-            # load setting from GUI to config.json                 
+
+# %%
+
+    def start_selection(self):
+        cfg = config.load_config() # first call
+        if( (cfg['paths']['DS_abs_path'] != None) and (cfg['paths']['CD_abs_path'] != None) ):
+
+            # load setting from GUI to config.json
             self.load_settings_from_gui()
-            
+
             # update var
-            cfg = config.load_config() 
-            
-            if( cfg['experiment_name'] != ''): 
-             
+            cfg = config.load_config()
+
+            if( cfg['experiment_name'] != ''):
+
                 if(self.check_models()==True):
                     self.search.raise_()
-                    
-                    ###########################           
+
+                    ###########################
                     self.start_timer()
-                    ###########################         
-                    
+                    ###########################
+
                     MS_thread = ModelSeletionThread(self)
-            
+
                     #thread.finished.connect(app.exit) #закрыть всё по завершению не уверен
-                    #MS_thread.signal_timer.connect(self.slot_timer)  
+                    #MS_thread.signal_timer.connect(self.slot_timer)
                     #MS_thread.signal_timer_finish.connect(self.slot_finish)
                     MS_thread.signal_model_selection_finish.connect(self.slot_search_end)
-                  
-                    MS_thread.start()  
+
+                    MS_thread.start()
                 else:
-                    self.warning_models.show()             
+                    self.warning_models.show()
             else:
-                self.warning_name.show()            
+                self.warning_name.show()
         else:
            self.warning_paths.show()
-        
+
 
 # %%
 
