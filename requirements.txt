@@ -31,7 +31,7 @@ docutils==0.14
 elm==0.4.1
 entrypoints==0.3
 et-xmlfile==1.0.1
-fsspec==0.6.2
+fsspec==0.7.4
 future==0.18.2
 gast==0.2.2
 geonamescache==1.1.0
