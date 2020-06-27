@@ -17,7 +17,7 @@ pandas==1.0.5
 patsy==0.5.1
 polylearn==0.1.dev0
 pymongo==3.10.1
-PyQt5==5.12.3
+PyQt5==5.15.0
 PyQt5-sip==4.19.18
 PyQtChart==5.12
 PyQtWebEngine==5.12.1
