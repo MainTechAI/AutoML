@@ -8,11 +8,11 @@ import config
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QDialog
 
+
 class Ui_Dialog(QDialog):
     def __init__(self):
         super(Ui_Dialog, self).__init__()
         self.setupUi()
-
 
     def setupUi(self):
         cfg = config.load_config()
@@ -227,8 +227,6 @@ class Ui_Dialog(QDialog):
         self.comboBox_validation.addItem("")
         self.comboBox_validation.addItem("")
 
-
-
         self.btn_ok = QtWidgets.QPushButton(self)
         self.btn_ok.setGeometry(QtCore.QRect(350, 270, 81, 31))
         self.btn_ok.setFocusPolicy(QtCore.Qt.StrongFocus)
@@ -261,21 +259,15 @@ class Ui_Dialog(QDialog):
         QtCore.QMetaObject.connectSlotsByName(self)
         self.setTabOrder(self.btn_ok, self.comboBox_saved_count)
 
-        self.setModal(True) # !!!
+        self.setModal(True)  # !!!
 
-
-        saved_count_index = self.getIndexComboBox(cfg['search_options']['saved_top_models_amount'],'saved_count')
-        metric_index = self.getIndexComboBox(cfg['search_options']['metric'],'metric')
-        validation_index = self.getIndexComboBox(cfg['search_options']['validation'],'validation')
+        saved_count_index = self.getIndexComboBox(cfg['search_options']['saved_top_models_amount'], 'saved_count')
+        metric_index = self.getIndexComboBox(cfg['search_options']['metric'], 'metric')
+        validation_index = self.getIndexComboBox(cfg['search_options']['validation'], 'validation')
 
         self.comboBox_saved_count.setCurrentIndex(saved_count_index)
         self.comboBox_metric.setCurrentIndex(metric_index)
         self.comboBox_validation.setCurrentIndex(validation_index)
-
-
-
-
-
 
     def retranslateUi(self, Dialog):
         _translate = QtCore.QCoreApplication.translate
@@ -329,12 +321,10 @@ class Ui_Dialog(QDialog):
         self.btn_ok.setText(_translate("Dialog", "Apply"))
         self.label_4.setText(_translate("Dialog", "Experimental"))
 
-
-
     def getIndexComboBox(self, str_val, CB_type):
-        items=[]
+        items = []
 
-        if(CB_type == 'saved_count'):
+        if CB_type == 'saved_count':
             items.append("All")
             items.append("The best")
             items.append("Top 5")
@@ -342,33 +332,27 @@ class Ui_Dialog(QDialog):
             items.append("Top 25")
             items.append("Top 50")
             for i in range(0, len(items)):
-                if(items[i]==str_val):
+                if items[i] == str_val:
                     return i
 
-        elif(CB_type == 'metric'):
+        elif CB_type == 'metric':
             items.append("accuracy")
             items.append("f1")
             items.append("f1_micro")
             items.append("f1_macro")
             for i in range(0, len(items)):
-                if(items[i]==str_val):
+                if items[i] == str_val:
                     return i
 
-        elif(CB_type == 'validation'):
+        elif CB_type == 'validation':
             items.append("10 fold CV")
             items.append("5 fold CV")
             items.append("3 fold CV")
             items.append("holdout")
             for i in range(0, len(items)):
-                if(items[i]==str_val):
+                if items[i] == str_val:
                     return i
-        return -1 # error
-
-
-
-
-
-
+        return -1  # error
 
 
 
@@ -408,7 +392,6 @@ class Ui_WarningPaths(QDialog):
 
 
 
-
 class Ui_WarningName(QDialog):
     def __init__(self):
         super(Ui_WarningName, self).__init__()
@@ -442,7 +425,6 @@ class Ui_WarningName(QDialog):
         _translate = QtCore.QCoreApplication.translate
         WarningName.setWindowTitle(_translate("WarningName", "Warning"))
         self.label.setText(_translate("WarningName", "Field \'experiment name\' must be filled"))
-
 
 
 

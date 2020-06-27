@@ -6,7 +6,6 @@ Module is used for data loading
 
 dataset (ds) - file (table) containing X, y
 column description (cd) -
-
 """
 
 import numpy as np
@@ -15,26 +14,25 @@ import os
 
 np.random.seed(0)
 
-# %%  Load DataSet from disc as pandas DataFrame
 
-def load_DS_as_df(path):
+
+def load_DS_as_df(path): # Load DataSet from disc as pandas DataFrame
     #path = str(Path(path))
     if os.path.isfile(path):
         DS = pd.read_csv(path, skiprows=0)#.dropna(how='any').as_matrix() #TODO change .as_matrix() to .values
         return DS
 
-# %%  Load Column Description from disc as list
 
-def load_CD_as_list(path):
+
+def load_CD_as_list(path): # Load Column Description from disc as list
     #path = str(Path(path))
     if os.path.isfile(path):
         numpy_cd = np.genfromtxt(path, delimiter=',', dtype=None, encoding=None)
         CD = numpy_cd.tolist()
         return CD
 
-# %%  TODO? or not
 
-def load_DS_as_np(path):
+def load_DS_as_np(path): # TODO ? or not
     #self.DS = np.genfromtxt(path, delimiter=',')   # ,dtype=None, encoding=None
     pass
 
@@ -58,7 +56,7 @@ def load_dataset_pandas(ds_abs_path, ds_type):
     В будущем можно расширить
     """
 
-    if (ds_type =='.csv'):
+    if ds_type == '.csv':
         #pandas_ds = pd.read_csv(ds_abs_path)
         pandas_ds = 0
         # final type should be ndarray?
@@ -77,7 +75,7 @@ def load_dataset_pandas(ds_abs_path, ds_type):
 
 def load_dataset_numpy(ds_abs_path, ds_type):
 
-    if (ds_type =='.csv'):
+    if ds_type == '.csv':
         from numpy import genfromtxt
         numpy_ds = genfromtxt(ds_abs_path, delimiter=',')
         return numpy_ds
@@ -88,7 +86,7 @@ def load_dataset_numpy(ds_abs_path, ds_type):
 
 def load_CD(cd_abs_path, cd_type):
 
-    if (cd_type =='.csv'):
+    if cd_type == '.csv':
         from numpy import genfromtxt
         numpy_cd = genfromtxt(cd_abs_path, delimiter=',', dtype=None, encoding=None)
         cd=numpy_cd.tolist()
@@ -100,17 +98,14 @@ def load_CD(cd_abs_path, cd_type):
 # %%   если в CD указаны не все колонки то недостоющие будут дополнены как Auxiliary
 
 def complete_CD(cd, ds, lib):
-    if(lib=='numpy'):
+    if lib== 'numpy':
         rows_count = ds.shape[0]
         columns_count = ds.shape[1]
-
-
         pass
 
 
-    elif(lib=='pandas'):
+    elif lib== 'pandas':
         print('pandas not supported')
-
 
 
     completed_cd=0
@@ -119,10 +114,9 @@ def complete_CD(cd, ds, lib):
 # %%
 
 def load_X_y_CD(ds_abs_path, ds_type, cd_abs_path, cd_type, lib='numpy'):
-    if(lib=='numpy'):
+    if lib== 'numpy':
         ds = load_dataset_numpy(ds_abs_path, ds_type)
         cd = complete_CD( load_CD(cd_abs_path, cd_type), ds, lib )
-
 
         X = 1
         y = 1
@@ -130,14 +124,11 @@ def load_X_y_CD(ds_abs_path, ds_type, cd_abs_path, cd_type, lib='numpy'):
 
         return X,y,cd
 
-    elif(lib=='pandas'):
+    elif lib== 'pandas':
         print('pandas not supported')
 
 
 
-
-
-# %%
 
 def load_openml_dataset(data_set_type='binary'):
     # add OpenML100 or OpenML-CC18
@@ -156,6 +147,7 @@ def load_openml_dataset(data_set_type='binary'):
 
     print(X.shape,Y.shape)
 
+    # TODO REMOVE and use imputer as a part of pipeline
     from missing import delete_missing
     X,Y = delete_missing(X,Y)
     print(X.shape,Y.shape)
@@ -191,7 +183,7 @@ def load_openml_dataset(data_set_type='binary'):
 # %%
 
 def load_example_dataset(data_set_type='binary'):
-    if(data_set_type=='binary'):
+    if data_set_type== 'binary':
 
         from sklearn.datasets import load_breast_cancer
         X, Y = load_breast_cancer(return_X_y=True)
@@ -240,7 +232,7 @@ def load_example_dataset(data_set_type='binary'):
 
         return X,Y
 # %%
-    elif(data_set_type=='multi class'):
+    elif data_set_type== 'multi class':
         """
         Number of targets: 1
         Cardinality: >2
@@ -251,7 +243,7 @@ def load_example_dataset(data_set_type='binary'):
         predict_for_single_row=[5]
         pass
 # %%
-    elif(data_set_type=='multi label'):
+    elif data_set_type== 'multi label':
         """
         Number of targets: >1
         Cardinality: 2  (0 and 1)
@@ -260,7 +252,7 @@ def load_example_dataset(data_set_type='binary'):
         predict_for_single_row=[1, 0, 0, 1]
         pass
 # %%
-    elif(data_set_type=='multioutput-multiclass classification'):
+    elif data_set_type== 'multioutput-multiclass classification':
         """
         Number of targets: >1
         Cardinality: >2
