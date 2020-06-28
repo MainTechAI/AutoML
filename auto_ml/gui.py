@@ -8,10 +8,8 @@ from os.path import expanduser
 import sys
 
 from utility.dialog import Ui_Dialog, Ui_WarningPaths, Ui_WarningName, Ui_WarningModels
-from utility.data import load_DS_as_df, load_CD_as_list
 import config
 
-# TODO load initial GUI values from config.json
 
 
 """
@@ -20,7 +18,7 @@ pyuic5 -o pyfilename.py design.ui
  -x executable  if __name__ == "__main__":
 """
 
-# %%
+# class TimerThread
 import time
 from PyQt5.QtCore import pyqtSlot, pyqtSignal, QThread  # QRunnable
 
@@ -44,10 +42,11 @@ class TimerThread(QThread):
         self.signal_timer_finish.emit()
 
 
-# %%
+
+# class ModelSeletionThread
 
 import auto
-
+from utility.data import load_DS_as_np, load_CD_as_list, CD_processing
 
 class ModelSeletionThread(QThread):
     signal_model_selection_finish = pyqtSignal()
@@ -57,11 +56,10 @@ class ModelSeletionThread(QThread):
 
         DS_path = cfg['paths']['DS_abs_path']
         CD_path = cfg['paths']['CD_abs_path']
+        DS = load_DS_as_np(DS_path)
+        num_cols, cat_cols, txt_cols, label_col = CD_processing(CD_path)
 
-        # MS=
-        auto.ModelSelection(
-            load_DS_as_df(DS_path).values,  # !!! load as df then to numpy
-            load_CD_as_list(CD_path),
+        MS = auto.ModelSelection(
             cfg['experiment_name'],
             cfg['search_options']['duration'],
             cfg['model_requirements']['min_accuracy'],
@@ -70,22 +68,29 @@ class ModelSeletionThread(QThread):
             cfg['model_requirements']['max_train_time'],
             cfg['search_space'],
             cfg['search_options']['metric'],
-            cfg['search_options']['validation'],  # TODO change API
+            cfg['search_options']['validation'],               # TODO change API
             cfg['search_options']['saved_top_models_amount'],  # TODO change API
             cfg['search_options']['iterations']
         )
 
-        # публичный метод по этому можешь вызвать
-        # MS.fit(5) # можно отсюда управлять
+        MS.fit(
+            x = DS, # may contain columns that will not be used ('AUX',y, etc)
+            y = DS[:, label_col],
+            num_features=num_cols,
+            cat_features=cat_cols,
+            txt_features=txt_cols,
+        )
+        MS.save_n_best_on_disk()
 
         print("ModelSeletionThread finish")
         self.signal_model_selection_finish.emit()
 
 
-# %%
 
 
-# %%
+
+# main GUI class
+
 class Ui_MainWindow(QMainWindow):
     signal_start_timer = pyqtSignal(int)
 

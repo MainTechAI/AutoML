@@ -8,12 +8,20 @@ import pandas as pd
 
 class ModelSelection:
 
-    def __init__(self, DS, CD, experiment_name, duration, min_accuracy,
+    def __init__(self, experiment_name, duration, min_accuracy,
                  max_model_memory, max_prediction_time, max_train_time,
                  used_algorithms, metric, validation, saved_models_count,
-                 iterations):
+                 iterations, resampling='all', max_jobs=1):
+
+        print('!start!')
 
         # !!!  DEV
+        # TODO resampling:
+        #  'under'    - Under-sampling
+        #  'over'     - Over-sampling
+        #  'combined' - Over-sampling followed by under-sampling
+        #  'clf'      - Ensemble classifier using samplers internally
+        #  'all'      - try all options (4)
 
         self.row_count = None
         self.columns_count = None  # all col (with target?)
@@ -21,12 +29,11 @@ class ModelSelection:
         self.cat_columns = []
         self.path_to_save = None
 
-        self.CV_jobs = 1
-
+        self.max_jobs = max_jobs
+        self.CV_jobs = self.max_jobs # fast solution TODO make better
         # !!!  DEV
 
-        self.DS = DS
-        self.CD = CD
+
         self.experiment_name = experiment_name
         self.duration = duration
         self.min_accuracy = min_accuracy
@@ -46,6 +53,7 @@ class ModelSelection:
         self.valtype = ''
         self.cv_splits = None
 
+        # TODO change
         if self.validation in ["3 fold CV", "5 fold CV", "10 fold CV"]:
             if self.validation == "3 fold CV":
                 self.cv_splits = 3
@@ -56,53 +64,47 @@ class ModelSelection:
             self.valtype = 'CV'
             from sklearn import model_selection
             self.kfold = model_selection.KFold(n_splits=self.cv_splits)
-
         elif self.validation == "holdout":
             self.valtype = 'H'
 
-        # DEBUG
-        print(self.DS)
-        print(type(self.DS))
-        print(self.DS.shape)
-        print(self.DS[0])
-        print(type(self.DS[0]))
-
-        print('!start!')
-        preproc = DataPreprocessing(self.DS, self.CD)
-        self.x, self.y = preproc.get_x_y()
-
-        self.y_ELM = preproc.encode_y_ELM_binary(self.y)
-        self.x_ELM = self.x.copy()
-        self.x_ELM = self.x_ELM.astype(np.float64)
-
-        self.nrows, self.ncol = self.x.shape
 
         self.models = ModelHolder().get_approved_models(self.used_algorithms)
 
-        self.search()  # ??? change to fit()
-
-        self.save_n_best_on_disk()  # TODO remove let user decide
-
         print('!end!')
 
-    # %%
+
     def check_time(self):
         if self.time_end > perf_counter():
             return True
         else:
             return False
 
-    # %%
 
-    def search(self):
+
+    def fit(self, x, y, num_features=[], cat_features=[], txt_features=[]):
+        """
+        x may include 'y' and any other unused columns
+        """
         from hyperopt import tpe, hp, fmin, STATUS_OK, Trials, STATUS_FAIL
         from sklearn.model_selection import train_test_split
         from sklearn.preprocessing import StandardScaler
         from sklearn.pipeline import make_pipeline
         from utility.util import split_val_score, cross_val_score
 
-        # print(self.y)
-        # print(self.y_ELM)
+        # TODO DEV  temporal solution
+        preproc = DataPreprocessing(x, num_features, cat_features)
+
+        self.x = preproc.get_x()
+        # self.nrows, self.ncol = self.x.shape
+
+        self.y = y
+
+
+        if self.used_algorithms['ELM'] == True:
+            self.y_ELM = preproc.encode_y_ELM_binary(self.y)
+            self.x_ELM = self.x.copy()
+            self.x_ELM = self.x_ELM.astype(np.float64)
+        # TODO DEV
 
         # if validation == holdout
         if self.valtype == 'H':
@@ -459,46 +461,27 @@ class ModelSelection:
 # ['accuracy']['model']['model_name']['model_memory']['prediction_time']['train_time']
 
 
-# %%   #################################################################
 
 
-# %%
 
-from category_encoders import OrdinalEncoder
+##################################################################
 
 
 class DataPreprocessing:
 
-    def __init__(self, DS, CD):
+    def __init__(self, DS, num_index, categ_index): # txt?
 
         self.DS = DS.copy()
-        self.CD = CD.copy()
 
-        self.col_grouping()
+        self.num_index = num_index
+        self.categ_index = categ_index
 
-    # %%
-
-    def col_grouping(self):
-
-        self.num_index = []
-        self.categ_index = []
-        self.label_index = None
-
-        for column in self.CD:
-            if column[1] == 'Num':
-                self.num_index.append(column[0] - 1)
-            elif column[1] == 'Categ':
-                self.categ_index.append(column[0] - 1)
-            elif column[1] == 'Label':
-                self.label_index = column[0] - 1
-
-        self.num_col = self.DS[:, self.num_index]
+        self.num_col   = self.DS[:, self.num_index]
         self.categ_col = self.DS[:, self.categ_index]
-        self.label_col = self.DS[:, self.label_index]
 
-    # %%
 
-    def encode_cat_col(self):
+    def encode_cat_col(self): # TODO pandas to numpy
+        from category_encoders import OrdinalEncoder
         enc = OrdinalEncoder(return_df=False).fit(self.categ_col)
         self.categ_col = enc.transform(self.categ_col)
 
@@ -506,11 +489,10 @@ class DataPreprocessing:
         print(self.DS)
         print(self.categ_col)
         # return pandas, IDK why
-        # 1TODO pandas to numpy
 
-    # %%
 
-    def get_x_y(self):
+
+    def get_x(self):
         # if cat col exist encode
         if len(self.categ_index) != 0:
 
@@ -527,13 +509,8 @@ class DataPreprocessing:
             print('no Categ, has Num')
             x = self.num_col
 
-        y = self.label_col
+        return x.astype(float)
 
-        # x to numpy float x.astype(float)
-        # .astype(float)
-        return x.astype(float), y
-
-    # %%
 
     # данная реализация ELM требует на вход 1 и -1
     def encode_y_ELM_binary(self, y_input):
@@ -546,53 +523,3 @@ class DataPreprocessing:
         return y.astype(np.int8)
 
 
-# %%
-
-
-# %% REMOVE LATER
-
-"""
-def foo():  # всё ок
-
-    import os
-
-    dir_name = 'experiment2'
-
-    work_path = os.getcwd()  # current working dir
-    path = os.path.join(work_path, dir_name)
-    print("The current working directory is %s" % work_path)
-
-    if (os.path.exists(path) == False):
-        os.mkdir(path)
-    else:
-        print('Directory already exist')
-
-    savedir = path
-    import os
-    filename = os.path.join(savedir, 'model.joblib')
-
-    from sklearn.datasets import load_breast_cancer
-    X, Y = load_breast_cancer(return_X_y=True)
-
-    # from sklearn.gaussian_process import GaussianProcessClassifier
-    # to_persist=GaussianProcessClassifier()
-
-    # from lightning.classification import AdaGradClassifier
-    # to_persist=AdaGradClassifier()
-
-    from dbn import SupervisedDBNClassification
-    to_persist = SupervisedDBNClassification()
-
-    to_persist.fit(X[:400], Y[:400])
-
-    print(filename)
-
-    import joblib
-    joblib.dump(to_persist, filename)
-
-    # load from file
-    import joblib
-    clf = joblib.load(filename)
-
-    print(clf.score(X[400:], Y[400:]))
-"""
