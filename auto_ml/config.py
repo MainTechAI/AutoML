@@ -26,7 +26,7 @@ default_config = {
 
     'model_requirements':
         {
-            'min_accuracy': 65,  # %
+            'min_accuracy': 0.55,  # (0,1)
             'max_memory': 1048576,  # bytes
             'max_single_predict_time': 40,  # ms
             'max_train_time': 100,  # sec

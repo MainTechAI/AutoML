@@ -2,7 +2,7 @@
     "task": "classification",
     "experiment_name": "experiment_1",
     "model_requirements": {
-        "min_accuracy": 65,
+        "min_accuracy": 0.55,
         "max_memory": 1048576,
         "max_single_predict_time": 40,
         "max_train_time": 100
