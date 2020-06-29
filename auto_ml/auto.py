@@ -7,22 +7,21 @@ import pandas as pd
 
 
 class ModelSelection:
-
     def __init__(self, experiment_name, duration, min_accuracy,
                  max_model_memory, max_prediction_time, max_train_time,
                  used_algorithms, metric, validation, saved_models_count,
-                 iterations, resampling='all', max_jobs=1):
-
+                 iterations, initial_resampling=None, max_jobs=1):
         print('!start!')
 
         # !!!  DEV
-        # TODO resampling:
-        #   None
+        # TODO initial_resampling:
+        #  None
         #  'under'    - Under-sampling
         #  'over'     - Over-sampling
         #  'combined' - Over-sampling followed by under-sampling
         #  'all'      - try all options (3)
-        self.resampling = resampling  # combine with balanced_accuracy metric?
+        #  GOAL: find single the best resampling and use as initial self.x, self.y
+        self.initial_resampling = initial_resampling  # combine with balanced_accuracy metric ??
 
         self.row_count = None
         self.columns_count = None  # all col (with target?)
@@ -31,7 +30,7 @@ class ModelSelection:
         self.path_to_save = None
 
         self.max_jobs = max_jobs
-        self.CV_jobs = self.max_jobs # fast solution TODO make better
+        self.CV_jobs = self.max_jobs # fast solution TODO make better, kinda resource manager
         # !!!  DEV
 
 
@@ -77,6 +76,7 @@ class ModelSelection:
         print('!end!')
 
 
+
     def check_time(self):
         if self.time_end > perf_counter():
             return True
@@ -97,26 +97,32 @@ class ModelSelection:
 
 
 
-        # TODO DEV  temporal solution
+        # TODO DEV
+        from data_preprocessing import DataPreprocessing
         preproc = DataPreprocessing(x, num_features, cat_features)
-
         self.x = preproc.get_x()
-        # self.nrows, self.ncol = self.x.shape
+        # self.nrows, self.ncol = self.x.shape # TODO ?
         self.y = y
-
-        # TODO RESAMPLING
-        if self.resampling != None:
-            self.resample()
+        print('class DataPreprocessing: Done')
 
 
+        from data_preprocessing import initial_resample
+        if self.initial_resampling != None:
+            print('RESAMPLING start')
+            self.x,self.y = initial_resample(self.x.copy(),self.y.copy(),'all')
+            print('RESAMPLING end')
+
+
+        from data_preprocessing import encode_y_ELM_binary
         if self.used_algorithms['ELM'] == True:
-            self.y_ELM = preproc.encode_y_ELM_binary(self.y)
+            self.y_ELM = encode_y_ELM_binary(self.y)
             self.x_ELM = self.x.copy()
             self.x_ELM = self.x_ELM.astype(np.float64)
         # TODO DEV
 
 
 
+        # TODO change
         # if validation == holdout
         if self.valtype == 'H':
             self.x_train, self.x_test, self.y_train, self.y_test = \
@@ -474,68 +480,5 @@ class ModelSelection:
 
 
 # ['accuracy']['model']['model_name']['model_memory']['prediction_time']['train_time']
-
-    def resample(self):
-        pass
-
-
-
-##################################################################
-
-
-class DataPreprocessing:
-
-    def __init__(self, DS, num_index, categ_index): # txt?
-
-        self.DS = DS.copy()
-
-        self.num_index = num_index
-        self.categ_index = categ_index
-
-        self.num_col   = self.DS[:, self.num_index]
-        self.categ_col = self.DS[:, self.categ_index]
-
-
-    def encode_cat_col(self): # TODO pandas to numpy
-        from category_encoders import OrdinalEncoder
-        enc = OrdinalEncoder(return_df=False).fit(self.categ_col)
-        self.categ_col = enc.transform(self.categ_col)
-
-        # DEBUG
-        print(self.DS)
-        print(self.categ_col)
-        # return pandas, IDK why
-
-
-
-    def get_x(self):
-        # if cat col exist encode
-        if len(self.categ_index) != 0:
-
-            self.encode_cat_col()
-
-            if len(self.num_index) != 0:
-                print('has Num, has Categ')
-                x = np.hstack([self.num_col, self.categ_col])
-            else:
-                print('no Num, has Categ')
-                x = self.categ_col
-
-        else:
-            print('no Categ, has Num')
-            x = self.num_col
-
-        return x.astype(float)
-
-
-    # данная реализация ELM требует на вход 1 и -1
-    def encode_y_ELM_binary(self, y_input):
-        y = y_input.copy()
-        for i in range(len(y)):
-            if y[i] == y[0]:
-                y[i] = 1
-            else:
-                y[i] = -1
-        return y.astype(np.int8)
 
 
