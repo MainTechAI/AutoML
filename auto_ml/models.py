@@ -953,6 +953,7 @@ class xRandTrees:
     def __init__(self, ):
         """
         Extrimly randomised trees
+        TODO check search space
         """
 
         self.name = 'Extra-trees classifier'

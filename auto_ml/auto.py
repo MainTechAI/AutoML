@@ -17,11 +17,12 @@ class ModelSelection:
 
         # !!!  DEV
         # TODO resampling:
+        #   None
         #  'under'    - Under-sampling
         #  'over'     - Over-sampling
         #  'combined' - Over-sampling followed by under-sampling
-        #  'clf'      - Ensemble classifier using samplers internally
-        #  'all'      - try all options (4)
+        #  'all'      - try all options (3)
+        self.resampling = resampling  # combine with balanced_accuracy metric?
 
         self.row_count = None
         self.columns_count = None  # all col (with target?)
@@ -43,8 +44,11 @@ class ModelSelection:
         self.iterations = iterations
 
         self.used_algorithms = used_algorithms
-        self.metric = metric
         self.validation = validation
+
+        # tested: accuracy, roc_auc, balanced_accuracy
+        # but currently some problems with f1, recall, precision
+        self.metric = metric
 
         self.saved_models_count = saved_models_count
 
@@ -83,7 +87,7 @@ class ModelSelection:
 
     def fit(self, x, y, num_features=[], cat_features=[], txt_features=[]):
         """
-        x may include 'y' and any other unused columns
+        x may include 'y' and any other even unused columns
         """
         from hyperopt import tpe, hp, fmin, STATUS_OK, Trials, STATUS_FAIL
         from sklearn.model_selection import train_test_split
@@ -91,13 +95,18 @@ class ModelSelection:
         from sklearn.pipeline import make_pipeline
         from utility.util import split_val_score, cross_val_score
 
+
+
         # TODO DEV  temporal solution
         preproc = DataPreprocessing(x, num_features, cat_features)
 
         self.x = preproc.get_x()
         # self.nrows, self.ncol = self.x.shape
-
         self.y = y
+
+        # TODO RESAMPLING
+        if self.resampling != None:
+            self.resample()
 
 
         if self.used_algorithms['ELM'] == True:
@@ -105,6 +114,8 @@ class ModelSelection:
             self.x_ELM = self.x.copy()
             self.x_ELM = self.x_ELM.astype(np.float64)
         # TODO DEV
+
+
 
         # if validation == holdout
         if self.valtype == 'H':
@@ -244,6 +255,13 @@ class ModelSelection:
                     if args['scale'] == True:
                         clf = make_pipeline(StandardScaler(), clf)
 
+                elif args['name'] == 'xRandTrees':
+                    clf = args['model'](
+                        max_features=args['param']['max_features'],
+                        min_samples_leaf=args['param']['min_samples_leaf'],
+                        bootstrap=args['param']['bootstrap'],
+                        # TODO add more? check existing
+                    )
 
                 else:
                     clf = args['model']()
@@ -297,9 +315,6 @@ class ModelSelection:
                     time_all = perf_counter() - start_timer
                 # %%
                 loss = (-accuracy)
-
-                if self.metric == 'accuracy':
-                    accuracy = accuracy * 100
 
                 # monitoring
                 print(accuracy)
@@ -381,7 +396,7 @@ class ModelSelection:
 
             self.optimal_results = results
 
-    # %%
+
 
     def save_n_best_on_disk(self, save_excel=True, save_config=True):
 
@@ -460,7 +475,8 @@ class ModelSelection:
 
 # ['accuracy']['model']['model_name']['model_memory']['prediction_time']['train_time']
 
-
+    def resample(self):
+        pass
 
 
 
