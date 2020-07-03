@@ -77,9 +77,7 @@ default_config = {
             #        'value':10,  # 10 CV or 70 holdout
             #    },
 
-            'saved_top_models_amount': 'All',
-            # TODO change ModelSelection API
-            # 'saved_top_models_amount':1, # number or 'all'
+            'saved_top_models_amount': 'All', # int or 'all' or 'the best' and other
         },
 
     'paths':

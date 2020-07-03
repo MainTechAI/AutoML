@@ -45,7 +45,6 @@ MS = ModelSelection(
     used_algorithms=used_algo,
     metric='roc_auc', #balanced_accuracy  accuracy
     validation='10 fold CV',
-    saved_models_count='All',
     iterations=40,
 )
 
@@ -64,5 +63,5 @@ MS.fit(
     #txt_features=txt_cols,
 )
 
-MS.save_n_best_on_disk()
+MS.save_results(n_best='All')
 

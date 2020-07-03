@@ -69,7 +69,6 @@ class ModelSeletionThread(QThread):
             cfg['search_space'],
             cfg['search_options']['metric'],
             cfg['search_options']['validation'],               # TODO change API
-            cfg['search_options']['saved_top_models_amount'],  # TODO change API
             cfg['search_options']['iterations']
         )
 
@@ -80,7 +79,7 @@ class ModelSeletionThread(QThread):
             cat_features=cat_cols,
             txt_features=txt_cols,
         )
-        MS.save_n_best_on_disk()
+        MS.save_results(n_best=cfg['search_options']['saved_top_models_amount'])
 
         print("ModelSeletionThread finish")
         self.signal_model_selection_finish.emit()

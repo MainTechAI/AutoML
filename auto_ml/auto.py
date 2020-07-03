@@ -4,13 +4,14 @@ from time import perf_counter
 from models import ModelHolder
 import numpy as np
 import pandas as pd
+import os
 
 
 class ModelSelection:
     def __init__(self, experiment_name, duration, min_accuracy,
                  max_model_memory, max_prediction_time, max_train_time,
-                 used_algorithms, metric, validation, saved_models_count,
-                 iterations, initial_resampling=None, max_jobs=1): # TODO remove saved_models_count and add smth like this to .save_n_best_on_disk()
+                 used_algorithms, metric, validation, iterations,
+                 initial_resampling=None, max_jobs=1):
         print('!start!')
 
         # !!!  DEV
@@ -48,8 +49,6 @@ class ModelSelection:
         # tested: accuracy, roc_auc, balanced_accuracy
         # but currently some problems with f1, recall, precision
         self.metric = metric
-
-        self.saved_models_count = saved_models_count
 
         self.time_end = perf_counter() + duration
 
@@ -404,10 +403,9 @@ class ModelSelection:
 
 
 
-    def save_n_best_on_disk(self, save_excel=True, save_config=True): # TODO add param. n_best='all' or int (and remove from MS constructor)
+    def save_results(self, n_best='All', save_excel=True, save_config=True):
 
         def save_model(to_persist, name):
-            import os
             dir_name = self.experiment_name
             work_path = os.getcwd()
             path = os.path.join(work_path, dir_name)
@@ -423,34 +421,48 @@ class ModelSelection:
         def sortSecond(val):
             return val[0]
 
+
+        # Create folder
+        work_path = os.getcwd()
+        path = os.path.join(work_path, self.experiment_name)
+        if os.path.exists(path) == False:
+            os.mkdir(path)
+
+
         # sort self.optimal_results by accuracy
         self.optimal_results.sort(key=sortSecond, reverse=True)
 
-        if self.saved_models_count == "All":
+
+        # TODO probably need rework. Looks not optimal.
+        if n_best == "All":
             for i in range(len(self.optimal_results)):
                 model = self.optimal_results[i][1]
                 name = str(i + 1) + '_' + str(self.optimal_results[i][2]) + '_' + str(self.optimal_results[i][0])
                 save_model(model, name)
-
         else:
-            if self.saved_models_count == "The best":
+            if isinstance(n_best, int):
+                model_num = n_best
+            elif n_best == None: # TODO NEW, need test
+                model_num = None
+            elif n_best == "The best":
                 model_num = 1
-            elif self.saved_models_count == "Top 5":
+            elif n_best == "Top 5":
                 model_num = 5
-            elif self.saved_models_count == "Top 10":
+            elif n_best == "Top 10":
                 model_num = 10
-            elif self.saved_models_count == "Top 25":
+            elif n_best == "Top 25":
                 model_num = 25
-            elif self.saved_models_count == "Top 50":
+            elif n_best == "Top 50":
                 model_num = 50
 
-            if len(self.optimal_results) < model_num:
-                model_num = len(self.optimal_results)
+            if model_num != None:
+                if len(self.optimal_results) < model_num:
+                    model_num = len(self.optimal_results)
 
-            for i in range(model_num):
-                model = self.optimal_results[i][1]
-                name = str(i + 1) + '_' + str(self.optimal_results[i][2]) + '_' + str(self.optimal_results[i][0])
-                save_model(model, name)
+                for i in range(model_num):
+                    model = self.optimal_results[i][1]
+                    name = str(i + 1) + '_' + str(self.optimal_results[i][2]) + '_' + str(self.optimal_results[i][0])
+                    save_model(model, name)
 
         if save_excel == True:
             self.results_excel.sort_values(by='accuracy', ascending=False, inplace=True)
@@ -472,7 +484,7 @@ class ModelSelection:
             cfg['search_options']['iterations'] = self.iterations
             cfg['search_options']['metric'] = self.metric
             cfg['search_options']['validation'] = self.validation
-            cfg['search_options']['saved_top_models_amount'] = self.saved_models_count
+            cfg['search_options']['saved_top_models_amount'] = n_best
             cfg['paths']['DS_abs_path'] = None
             cfg['paths']['CD_abs_path'] = None
 
