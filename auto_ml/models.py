@@ -658,6 +658,8 @@ class GaussianProcess:
             'model': gaussian_process.GaussianProcessClassifier,
             'param': None
         }
+        # from sklearn.gaussian_process.kernels import RBF
+        # GaussianProcessClassifier(1.0 * RBF(1.0)),
 
     def get_skl_estimator(self, **default_parameters):
         return gaussian_process.GaussianProcessClassifier(**default_parameters)

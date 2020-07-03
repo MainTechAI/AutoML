@@ -10,7 +10,7 @@ class ModelSelection:
     def __init__(self, experiment_name, duration, min_accuracy,
                  max_model_memory, max_prediction_time, max_train_time,
                  used_algorithms, metric, validation, saved_models_count,
-                 iterations, initial_resampling=None, max_jobs=1):
+                 iterations, initial_resampling=None, max_jobs=1): # TODO remove saved_models_count and add smth like this to .save_n_best_on_disk()
         print('!start!')
 
         # !!!  DEV
@@ -106,7 +106,7 @@ class ModelSelection:
         print('class DataPreprocessing: Done')
 
 
-        from data_preprocessing import initial_resample
+        from resampling import initial_resample
         if self.initial_resampling != None:
             print('RESAMPLING start')
             self.x,self.y = initial_resample(self.x.copy(),self.y.copy(),'all')
@@ -382,7 +382,7 @@ class ModelSelection:
         #    self.status='Unexpected error'
 
         # %%
-        if self.status == 'OK':
+        if self.status == 'OK': # TODO remove this filter?
             # SAVE to EXCEL
             excel_results = []
             for res in trials.results:
@@ -404,7 +404,7 @@ class ModelSelection:
 
 
 
-    def save_n_best_on_disk(self, save_excel=True, save_config=True):
+    def save_n_best_on_disk(self, save_excel=True, save_config=True): # TODO add param. n_best='all' or int (and remove from MS constructor)
 
         def save_model(to_persist, name):
             import os
