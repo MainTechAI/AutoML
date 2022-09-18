@@ -5,3 +5,5 @@ The source code is partially incomplete. I will probably post the full version l
 
 TODO in issues.
 API updates at the first place. (GUI at the last)
+
+(TODO) Describe what the application is intended for. Add screenshots.
