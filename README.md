@@ -4,6 +4,6 @@ Graduate qualification work 2020 [pdf](http://omega.sp.susu.ru/publications/bach
 The source code is partially incomplete. I will probably post the full version later. 
 
 TODO in issues.
-API updates at the first place. (GUI at the last)
+API updates is a top priority (GUI last).
 
 (TODO) Describe what the application is intended for. Add screenshots.
