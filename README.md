@@ -1,6 +1,13 @@
 # AutoML
 
-How to run an experiment:
+### Installation
+```
+git clone https://github.com/MainTechAI/AutoML.git
+cd AutoML
+conda env create --name NEW_ENV_NAME --file=environments.yml
+```
+
+### How to run an experiment:
 * Upload your dataset and column descriptions file
 * Select desired ML algorithms (e.g., SVM and XGBoost) in settings 
 * Select desired metric (e.g., F1-score) in settings 
