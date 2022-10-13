@@ -4,7 +4,7 @@
 ```
 git clone https://github.com/MainTechAI/AutoML.git
 cd AutoML
-conda env create --name NEW_ENV_NAME --file=environments.yml
+conda env create --name NEW_ENV_NAME --file=requirements.yml
 ```
 
 ### How to run an experiment:
