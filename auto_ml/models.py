@@ -53,16 +53,14 @@ class ModelHolder:
             LabelSpreading(),  # +
             MLP(),  # +
             XGBoost(),  # + по статье
-            ELM(),  # +
-
-            DBN(),
-            FactorizationMachine(),
-            PolynomialNetwork()
+            # TODO ELM(),
+            # TODO DBN(),
+            # TODO FactorizationMachine(),
+            # TODO PolynomialNetwork()
 
             # DummyClassifier() #??
         ]
 
-    # %%
     def get_approved_models(self, used_algorithms):
 
         approved_models = []
@@ -79,8 +77,6 @@ class ModelHolder:
 
         return approved_models
 
-    # %%
-
     # estimators
     def get_all_models(self, jobs=None):
         models = []
@@ -91,7 +87,6 @@ class ModelHolder:
         return models
 
 
-# %%
 """
 #https://scikit-learn.org/stable/modules/kernel_approximation.html#kernel-approximation
 """
@@ -183,8 +178,6 @@ class SVM:
         return svm.SVC(**default_parameters)
 
 
-# %%
-
 class LinearSVC:
     def __init__(self, ):
         self.description = """
@@ -217,7 +210,6 @@ class LinearSVC:
         return svm.LinearSVC(**default_parameters)
 
 
-# %%
 import xgboost
 
 
@@ -299,12 +291,8 @@ class XGBoost:
         return xgboost.XGBClassifier(**default_parameters)
 
 
-# %%
-
 from sklearn import linear_model
 
-
-# %%
 
 class Perceptron:
     def __init__(self, ):
@@ -335,8 +323,6 @@ class Perceptron:
         return linear_model.Perceptron(**default_parameters)
 
 
-# %%
-
 class Ridge:
     def __init__(self, ):
         """
@@ -363,8 +349,6 @@ class Ridge:
     def get_skl_estimator(self, **default_parameters):
         return linear_model.RidgeClassifier(**default_parameters)
 
-
-# %%
 
 class PassiveAggressive:
     def __init__(self, ):
@@ -394,8 +378,6 @@ class PassiveAggressive:
     def get_skl_estimator(self, **default_parameters):
         return linear_model.PassiveAggressiveClassifier(**default_parameters)
 
-
-# %%
 
 class LogisticRegression:
 
@@ -431,11 +413,8 @@ class LogisticRegression:
         return linear_model.LogisticRegression(**default_parameters)
 
 
-# %%
 from sklearn import discriminant_analysis
 
-
-# %%
 
 class LDA:
     def __init__(self, ):
@@ -479,8 +458,6 @@ class LDA:
         return discriminant_analysis.LinearDiscriminantAnalysis(**default_parameters)
 
 
-# %%
-
 class QDA:
     def __init__(self, ):
         """
@@ -511,8 +488,6 @@ class QDA:
     def get_skl_estimator(self, **default_parameters):
         return discriminant_analysis.QuadraticDiscriminantAnalysis(**default_parameters)
 
-
-# %%
 
 class SGD:
 
@@ -549,12 +524,8 @@ class SGD:
         return linear_model.SGDClassifier(**default_parameters)
 
 
-# %%
-
 from sklearn import neighbors
 
-
-# %%
 
 class KNeighbors:
     def __init__(self, n_rows=1000):
@@ -594,8 +565,6 @@ class KNeighbors:
         return neighbors.KNeighborsClassifier(**default_parameters)
 
 
-# %%
-
 class NearestCentroid:
     def __init__(self, ):
         """
@@ -624,11 +593,8 @@ class NearestCentroid:
         return neighbors.NearestCentroid(**default_parameters)
 
 
-# %%
 from sklearn import gaussian_process
 
-
-# %%
 
 class GaussianProcess:
     def __init__(self, ):
@@ -665,14 +631,11 @@ class GaussianProcess:
         return gaussian_process.GaussianProcessClassifier(**default_parameters)
 
 
-# %%
-
 from sklearn import naive_bayes
 
 
 # https://stackoverflow.com/questions/38621053/how-can-i-use-sklearn-naive-bayes-with-multiple-categorical-features
 
-# %%
 
 class BernoulliNB:
     def __init__(self, ):
@@ -702,8 +665,6 @@ class BernoulliNB:
         return naive_bayes.BernoulliNB(**default_parameters)
 
 
-# %%
-
 class GaussianNB:
     def __init__(self, ):
         """
@@ -730,15 +691,12 @@ class GaussianNB:
         return naive_bayes.GaussianNB(**default_parameters)
 
 
-# %%
-
 from sklearn import tree
 
 
 # pruning (better accuracy on test set)
 # https://scikit-learn.org/stable/auto_examples/tree/plot_cost_complexity_pruning.html#sphx-glr-auto-examples-tree-plot-cost-complexity-pruning-py
 
-# %%
 
 class DecisionTree:
     def __init__(self, ):
@@ -778,8 +736,6 @@ class DecisionTree:
         return tree.DecisionTreeClassifier(**default_parameters)
 
 
-# %%
-
 from sklearn import ensemble
 
 """
@@ -792,8 +748,6 @@ from sklearn import ensemble
     (e.g., shallow decision trees).
 """
 
-
-# %%
 
 class BaggingSVC:  # только Bagging только SVC(kernel=rbf)
     def __init__(self, ):
@@ -867,8 +821,6 @@ class BaggingSVC:  # только Bagging только SVC(kernel=rbf)
     def get_skl_estimator(self, **default_parameters):
         return ensemble.BaggingClassifier(**default_parameters)
 
-
-# %%
 
 class RandomForest:
     def __init__(self, ):
@@ -949,8 +901,6 @@ class RandomForest:
         return ensemble.RandomForestClassifier(**default_parameters)
 
 
-# %%
-
 class xRandTrees:
     def __init__(self, ):
         """
@@ -998,8 +948,6 @@ class xRandTrees:
     def get_skl_estimator(self, **default_parameters):
         return ensemble.ExtraTreesClassifier(**default_parameters)
 
-
-# %%
 
 class AdaBoost:
     def __init__(self, ):
@@ -1056,10 +1004,8 @@ class AdaBoost:
         return ensemble.AdaBoostClassifier(**default_parameters)
 
 
-# %%
-from sklearn.experimental import enable_hist_gradient_boosting
-
-
+# after requirements update it is not necessary now
+# from sklearn.experimental import enable_hist_gradient_boosting
 class HistGB:
     def __init__(self, ):
         """
@@ -1113,7 +1059,6 @@ class HistGB:
         return ensemble.HistGradientBoostingClassifier(**default_parameters)
 
 
-# %%
 from sklearn import semi_supervised
 
 """
@@ -1123,8 +1068,6 @@ I'm not sure should i use it if there are no not labeled data
 Если все данные размечены то точность одинаковая
 """
 
-
-# %%
 
 class LabelSpreading:
     def __init__(self, ):
@@ -1164,12 +1107,7 @@ class LabelSpreading:
         return semi_supervised.LabelSpreading(**default_parameters)
 
 
-# %%
-
 from sklearn import neural_network
-
-
-# %%
 
 class MLP:
     def __init__(self, ):
@@ -1226,162 +1164,138 @@ class MLP:
         return neural_network.MLPClassifier(**default_parameters)
 
 
-# %%
 # import dbn
-
-class DBN:
-    def __init__(self, ):
-        """
-        heavy
-        """
-
-        self.name = 'Deep Belief Network Classifier'
-        self.short_name = 'DBN'
-
-        self.default_parameters = {
-            "hidden_layers_structure": [100, 100],
-            "activation_function": 'sigmoid',
-            "optimization_algorithm": 'sgd',
-            "learning_rate": 1e-3,
-            "learning_rate_rbm": 1e-3,
-            "n_iter_backprop": 100,
-            "l2_regularization": 1.0,
-            "n_epochs_rbm": 10,
-            "contrastive_divergence_iter": 1,
-            "batch_size": 32,
-            "dropout_p": 0,  # float between 0 and 1.
-            "verbose": False
-        }
-
-        self.search_space = {
-            'name': 'DBN',
-            'model': None,  # dbn.SupervisedDBNClassification,
-            'param': None,
-        }
-
-    # def get_skl_estimator(self, **default_parameters):
-    #    return dbn.SupervisedDBNClassification(**default_parameters)
+#
+# class DBN:
+#     def __init__(self, ):
+#         # heavy
+#         self.name = 'Deep Belief Network Classifier'
+#         self.short_name = 'DBN'
+#
+#         self.default_parameters = {
+#             "hidden_layers_structure": [100, 100],
+#             "activation_function": 'sigmoid',
+#             "optimization_algorithm": 'sgd',
+#             "learning_rate": 1e-3,
+#             "learning_rate_rbm": 1e-3,
+#             "n_iter_backprop": 100,
+#             "l2_regularization": 1.0,
+#             "n_epochs_rbm": 10,
+#             "contrastive_divergence_iter": 1,
+#             "batch_size": 32,
+#             "dropout_p": 0,  # float between 0 and 1.
+#             "verbose": False
+#         }
+#
+#         self.search_space = {
+#             'name': 'DBN',
+#             'model': None,  # dbn.SupervisedDBNClassification,
+#             'param': None,
+#         }
+#
+#     # def get_skl_estimator(self, **default_parameters):
+#     #    return dbn.SupervisedDBNClassification(**default_parameters)
 
 
-# %%
-
-import polylearn
-
-
-# %%
-
-class FactorizationMachine:
-    def __init__(self, ):
-        """
-        http://mblondel.org/publications/mblondel-icml2016.pdf
-
-        """
-
-        self.name = 'Factorization Machine Classifier'
-        self.short_name = 'FactorizationMachine'
-
-        self.default_parameters = {
-            "degree": 2,
-            "loss": 'squared_hinge',
-            "n_components": 2,
-            "alpha": 1,
-            "beta": 1,
-            "tol": 1e-6,
-            "fit_lower": 'explicit',
-            "fit_linear": True,
-            "warm_start": False,
-            "init_lambdas": 'ones',
-            "max_iter": 10000,
-            "verbose": False,
-            "random_state": None
-        }
-
-        self.parameters_mandatory_first_check = [
-            {"n_components": 1},
-            {"n_components": 2},
-            {"n_components": 3}
-        ]
-
-        self.search_space = {
-            'name': 'FactorizationMachine',
-            'model': polylearn.FactorizationMachineClassifier,
-            'param': None
-        }
-
-    def get_skl_estimator(self, **default_parameters):
-        return polylearn.FactorizationMachineClassifier(**default_parameters)
-
-
-# %%
-
-class PolynomialNetwork:
-    def __init__(self, ):
-        """
-        http://mblondel.org/publications/mblondel-icml2016.pdf
-
-        """
-
-        self.name = 'Polynomial Network Classifier'
-        self.short_name = 'PolynomialNetwork'
-
-        self.default_parameters = {
-            "degree": 2, "loss": 'squared_hinge', "n_components": 2, "beta": 1,
-            "tol": 1e-6, "fit_lower": 'augment', "warm_start": False,
-            "max_iter": 10000, "verbose": False, "random_state": None
-        }
-
-        self.parameters_mandatory_first_check = [
-            {"degree": 2},
-            {"degree": 3}
-        ]
-
-        self.search_space = {
-            'name': 'PolynomialNetwork',
-            'model': polylearn.PolynomialNetworkClassifier,
-            'param': None
-        }
-
-    def get_skl_estimator(self, **default_parameters):
-        return polylearn.PolynomialNetworkClassifier(**default_parameters)
+# import polylearn
+#
+# class FactorizationMachine:
+#     def __init__(self, ):
+#         # http://mblondel.org/publications/mblondel-icml2016.pdf
+#
+#         self.name = 'Factorization Machine Classifier'
+#         self.short_name = 'FactorizationMachine'
+#
+#         self.default_parameters = {
+#             "degree": 2,
+#             "loss": 'squared_hinge',
+#             "n_components": 2,
+#             "alpha": 1,
+#             "beta": 1,
+#             "tol": 1e-6,
+#             "fit_lower": 'explicit',
+#             "fit_linear": True,
+#             "warm_start": False,
+#             "init_lambdas": 'ones',
+#             "max_iter": 10000,
+#             "verbose": False,
+#             "random_state": None
+#         }
+#
+#         self.parameters_mandatory_first_check = [
+#             {"n_components": 1},
+#             {"n_components": 2},
+#             {"n_components": 3}
+#         ]
+#
+#         self.search_space = {
+#             'name': 'FactorizationMachine',
+#             'model': polylearn.FactorizationMachineClassifier,
+#             'param': None
+#         }
+#
+#     def get_skl_estimator(self, **default_parameters):
+#         return polylearn.FactorizationMachineClassifier(**default_parameters)
+#
+#
+#
+# class PolynomialNetwork:
+#     def __init__(self, ):
+#         # http://mblondel.org/publications/mblondel-icml2016.pdf
+#
+#         self.name = 'Polynomial Network Classifier'
+#         self.short_name = 'PolynomialNetwork'
+#
+#         self.default_parameters = {
+#             "degree": 2, "loss": 'squared_hinge', "n_components": 2, "beta": 1,
+#             "tol": 1e-6, "fit_lower": 'augment', "warm_start": False,
+#             "max_iter": 10000, "verbose": False, "random_state": None
+#         }
+#
+#         self.parameters_mandatory_first_check = [
+#             {"degree": 2},
+#             {"degree": 3}
+#         ]
+#
+#         self.search_space = {
+#             'name': 'PolynomialNetwork',
+#             'model': polylearn.PolynomialNetworkClassifier,
+#             'param': None
+#         }
+#
+#     def get_skl_estimator(self, **default_parameters):
+#         return polylearn.PolynomialNetworkClassifier(**default_parameters)
 
 
-# %%
+# import elm
+#
+# class ELM:
+#     def __init__(self, ):
+#         # http://mblondel.org/publications/mblondel-icml2016.pdf
+#         # very fast and good accuracy
+#         # may be try with AdaBoost or Boosting?
+#
+#         self.name = 'Extreme learning machine'
+#         self.short_name = 'ELM'
+#
+#         self.default_parameters = {
+#             "hid_num": 10,
+#             "a": 1
+#         }
+#
+#         self.scale = None
+#         self.search_space = {
+#             'name': 'ELM',
+#             'model': elm.ELM,
+#             'param': {
+#                 'hid_num': hp.qloguniform('ELM_p1', np.log(1), np.log(1500), 1),
+#                 'a': hp.loguniform('ELM_p2', -12, 6),
+#             }
+#         }
+#
+#     def get_skl_estimator(self, **default_parameters):
+#         return elm.ELM(hid_num=10)  # (**default_parameters)
 
-import elm
-
-
-class ELM:
-    def __init__(self, ):
-        """
-        http://mblondel.org/publications/mblondel-icml2016.pdf
-
-        very fast and good accuracy
-        may be try with AdaBoost or Boosting?
-        """
-
-        self.name = 'Extreme learning machine'
-        self.short_name = 'ELM'
-
-        self.default_parameters = {
-            "hid_num": 10,
-            "a": 1
-        }
-
-        self.scale = None
-        self.search_space = {
-            'name': 'ELM',
-            'model': elm.ELM,
-            'param': {
-                'hid_num': hp.qloguniform('ELM_p1', np.log(1), np.log(1500), 1),
-                'a': hp.loguniform('ELM_p2', -12, 6),
-            }
-        }
-
-    def get_skl_estimator(self, **default_parameters):
-        return elm.ELM(hid_num=10)  # (**default_parameters)
-
-
-# %%                    ???
 
 """
 from sklearn import dummy

@@ -10,8 +10,6 @@ import sys
 from utility.dialog import Ui_Dialog, Ui_WarningPaths, Ui_WarningName, Ui_WarningModels
 import config
 
-
-
 """
 from .ui to .py
 pyuic5 -o pyfilename.py design.ui
@@ -42,11 +40,11 @@ class TimerThread(QThread):
         self.signal_timer_finish.emit()
 
 
-
 # class ModelSeletionThread
 
 import auto
 from utility.data import load_DS_as_np, load_CD_as_list, CD_processing
+
 
 class ModelSeletionThread(QThread):
     signal_model_selection_finish = pyqtSignal()
@@ -68,13 +66,13 @@ class ModelSeletionThread(QThread):
             cfg['model_requirements']['max_train_time'],
             cfg['search_space'],
             cfg['search_options']['metric'],
-            cfg['search_options']['validation'],               # TODO change API
+            cfg['search_options']['validation'],  # TODO change API
             cfg['search_options']['iterations']
         )
 
         MS.fit(
-            x = DS, # may contain columns that will not be used ('AUX',y, etc)
-            y = DS[:, label_col],
+            x=DS,  # may contain columns that will not be used ('AUX',y, etc)
+            y=DS[:, label_col],
             num_features=num_cols,
             cat_features=cat_cols,
             txt_features=txt_cols,
@@ -83,9 +81,6 @@ class ModelSeletionThread(QThread):
 
         print("ModelSeletionThread finish")
         self.signal_model_selection_finish.emit()
-
-
-
 
 
 # main GUI class
@@ -463,8 +458,6 @@ class Ui_MainWindow(QMainWindow):
 
         self.show()
 
-    # %%
-
     def retranslateUi(self, MainWindow):  # in russian
         cfg = config.load_config()
 
@@ -499,8 +492,6 @@ class Ui_MainWindow(QMainWindow):
         self.btnSettings_4.setText(_translate("MainWindow", "Testing"))  # !!!
         self.label_9.setText(_translate("MainWindow", "Max iterations"))
 
-    # %%
-
     def load_dataset_dialog(self):
         fileDlg = QFileDialog(self)
         # fileDlg.setDirectory('./')
@@ -522,8 +513,6 @@ class Ui_MainWindow(QMainWindow):
             font = QtGui.QFont()
             font.setUnderline(False)
             self.btnLoadDataset.setFont(font)
-
-    # %%
 
     def load_column_description_dialog(self):
         fileDlg = QFileDialog(self)
@@ -547,7 +536,7 @@ class Ui_MainWindow(QMainWindow):
             font.setUnderline(False)
             self.btnLoadColumnsDescription.setFont(font)
 
-    # %%
+    
     def checkbox_state(self, checkbox):
         if checkbox.checkState() == 2:
             return True
@@ -606,7 +595,7 @@ class Ui_MainWindow(QMainWindow):
 
         config.save_config(cfg)
 
-    # %%
+    
 
     @pyqtSlot(int)
     def slot_timer(self, value):
@@ -645,7 +634,7 @@ class Ui_MainWindow(QMainWindow):
 
         timer_thread.start()
 
-    # %%
+    
 
     def check_models(self):
         cfg = config.load_config()
@@ -653,8 +642,6 @@ class Ui_MainWindow(QMainWindow):
             if val == True:
                 return True
         return False
-
-    # %%
 
     def start_selection(self):
         cfg = config.load_config()  # first call
@@ -690,8 +677,6 @@ class Ui_MainWindow(QMainWindow):
         else:
             self.warning_paths.show()
 
-
-# %%
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
