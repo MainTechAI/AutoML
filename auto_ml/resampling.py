@@ -1,5 +1,4 @@
 
-
 def initial_resample(x, y, res_type='all'):
     """
     function takes x and y

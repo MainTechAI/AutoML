@@ -1,6 +1,5 @@
 import numpy as np
 
-
 def encode_y_ELM_binary(y_input):
     # current ELM realisation requires 1 and -1 as 'y' values
     # TODO use other ELM package, or rewrite current
@@ -12,9 +11,6 @@ def encode_y_ELM_binary(y_input):
             y[i] = -1
     return y.astype(np.int8)
 
-
-
-##################################################################
 
 class DataPreprocessing:
 

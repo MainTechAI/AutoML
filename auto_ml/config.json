@@ -41,11 +41,11 @@
         "iterations": 100,
         "metric": "accuracy",
         "validation": "10 fold CV",
-        "saved_top_models_amount": "All"
+        "saved_top_models_amount": "Top 10"
     },
     "paths": {
-        "DS_abs_path": null,
-        "CD_abs_path": null
+        "DS_abs_path": "C:\\Users\\path\\to\\dataset.csv",
+        "CD_abs_path": "C:\\Users\\path\\to\\column_description_file.csv"
     },
     "global_variables": {
         "DS_name": null,

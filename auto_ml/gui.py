@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QMainWindow, QFileDialog
 
@@ -479,7 +477,10 @@ class Ui_MainWindow(QMainWindow):
         self.label_7.setText(_translate("MainWindow", "Max model training time (sec)"))
         self.btn_goto_menu.setText(_translate("MainWindow", "Menu"))
         self.label.setText(_translate("MainWindow", "Upon completion of the search, the results will be saved in:"))
-        self.label_8.setText(_translate("MainWindow", r"C:\Users\maxim\Dropbox\auto_ml\experiment_1"))
+
+        # TODO not working as intended, it's just a const text
+        self.label_8.setText(_translate("MainWindow", r"C:\path\to\auto_ml\experiment_1"))
+
         self.btn_menu_search.setText(_translate("MainWindow", "Model selection"))
         self.btn_menu_exit.setText(_translate("MainWindow", "Exit"))
         self.label_10.setText(_translate("MainWindow", "Testing"))  # !!! not implemented
@@ -536,7 +537,6 @@ class Ui_MainWindow(QMainWindow):
             font.setUnderline(False)
             self.btnLoadColumnsDescription.setFont(font)
 
-    
     def checkbox_state(self, checkbox):
         if checkbox.checkState() == 2:
             return True
@@ -595,8 +595,6 @@ class Ui_MainWindow(QMainWindow):
 
         config.save_config(cfg)
 
-    
-
     @pyqtSlot(int)
     def slot_timer(self, value):
         if self.lcd_bool == True:
@@ -633,8 +631,6 @@ class Ui_MainWindow(QMainWindow):
         self.signal_start_timer.emit(cfg['search_options']['duration'])
 
         timer_thread.start()
-
-    
 
     def check_models(self):
         cfg = config.load_config()

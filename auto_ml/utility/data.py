@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Module is used for data loading
     * your datasets
@@ -88,17 +87,15 @@ def load_dataset_pandas(ds_abs_path, ds_type):
         # np.asarray(df)
 
         return pandas_ds
-
-
 #    df['origin'] = df['origin'].astype('category')
 # in Python, it's a good practice to typecast categorical features to a
 # category dtype because they make the operations on such columns much
 # faster than the object dtype
 #    return 'Функция ещё не дописана'
 
-# %%   load with numpy
 
 def load_dataset_numpy(ds_abs_path, ds_type):
+    # load dataset using numpy
     if ds_type == '.csv':
         from numpy import genfromtxt
         numpy_ds = genfromtxt(ds_abs_path, delimiter=',')
@@ -107,7 +104,7 @@ def load_dataset_numpy(ds_abs_path, ds_type):
         return 'this type is not supported'
 
 
-# %%
+
 
 def load_CD(cd_abs_path, cd_type):
     if cd_type == '.csv':
@@ -120,9 +117,9 @@ def load_CD(cd_abs_path, cd_type):
     return cd
 
 
-# %%   если в CD указаны не все колонки то недостоющие будут дополнены как Auxiliary
 
 def complete_CD(cd, ds, lib):
+    # если в CD указаны не все колонки то недостоющие будут дополнены как Auxiliary
     if lib == 'numpy':
         rows_count = ds.shape[0]
         columns_count = ds.shape[1]
@@ -135,8 +132,6 @@ def complete_CD(cd, ds, lib):
     completed_cd = 0
     return completed_cd
 
-
-# %%
 
 def load_X_y_CD(ds_abs_path, ds_type, cd_abs_path, cd_type, lib='numpy'):
     if lib == 'numpy':
@@ -153,54 +148,54 @@ def load_X_y_CD(ds_abs_path, ds_type, cd_abs_path, cd_type, lib='numpy'):
         print('pandas not supported')
 
 
-def load_openml_dataset(data_set_type='binary'):
-    # add OpenML100 or OpenML-CC18
-    # pip install openml
-    # https://docs.openml.org/benchmark/
-    """
-    ############################
-    #
-    #        НЕ РАБОТАЕТ проблема в pandas?
-    #
-    ###########################№
-    """
-    # https://scikit-learn.org/stable/datasets/index.html#openml
-    from sklearn.datasets import fetch_openml
-    X, Y = fetch_openml(name='cylinder-bands', return_X_y=True, as_frame=True)
-
-    print(X.shape, Y.shape)
-
-    # TODO REMOVE and use imputer as a part of pipeline
-    from missing import delete_missing
-    X, Y = delete_missing(X, Y)
-    print(X.shape, Y.shape)
-    #        X.to_excel("X.xlsx")
-    #        Y.to_excel("Y.xlsx")
-
-    X_cat = X.select_dtypes(include=['category'])
-    X_other = X.select_dtypes(exclude=['category'])
-
-    from encoding import unsupervised_encoding
-
-    X_unsu_encoded = unsupervised_encoding(X_cat)
-
-    print(X.shape, Y.shape)
-    print(X, Y)
-
-    X_concat = pd.concat([X_other, X_unsu_encoded], axis=1, sort=False)
-
-    X = X_concat.to_numpy()
-    from encoding import encode_y
-    Y = encode_y(Y)
-
-    """
-    data = fetch_openml(name='cylinder-bands')
-    print(data.data.shape,"\n")
-    print(data.target.shape,"\n")
-    print(np.unique(data.target),"\n")
-    print(data.details)
-    """
-    return X, Y
+# def load_openml_dataset(data_set_type='binary'):
+#     # add OpenML100 or OpenML-CC18
+#     # pip install openml
+#     # https://docs.openml.org/benchmark/
+#     """
+#     ############################
+#     #
+#     #        НЕ РАБОТАЕТ проблема в pandas?
+#     #
+#     ###########################№
+#     """
+#     # https://scikit-learn.org/stable/datasets/index.html#openml
+#     from sklearn.datasets import fetch_openml
+#     X, Y = fetch_openml(name='cylinder-bands', return_X_y=True, as_frame=True)
+#
+#     print(X.shape, Y.shape)
+#
+#     # TODO REMOVE and use imputer as a part of pipeline
+#     from missing import delete_missing
+#     X, Y = delete_missing(X, Y)
+#     print(X.shape, Y.shape)
+#     #        X.to_excel("X.xlsx")
+#     #        Y.to_excel("Y.xlsx")
+#
+#     X_cat = X.select_dtypes(include=['category'])
+#     X_other = X.select_dtypes(exclude=['category'])
+#
+#     from encoding import unsupervised_encoding
+#
+#     X_unsu_encoded = unsupervised_encoding(X_cat)
+#
+#     print(X.shape, Y.shape)
+#     print(X, Y)
+#
+#     X_concat = pd.concat([X_other, X_unsu_encoded], axis=1, sort=False)
+#
+#     X = X_concat.to_numpy()
+#     from encoding import encode_y
+#     Y = encode_y(Y)
+#
+#     """
+#     data = fetch_openml(name='cylinder-bands')
+#     print(data.data.shape,"\n")
+#     print(data.target.shape,"\n")
+#     print(np.unique(data.target),"\n")
+#     print(data.details)
+#     """
+#     return X, Y
 
 
 # %%

@@ -1,12 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Mon May 11 21:33:43 2020
-
-@author: dosto
-"""
-
-# %%
-
 from pathlib import Path
 import json
 import os.path
@@ -77,7 +68,7 @@ default_config = {
             #        'value':10,  # 10 CV or 70 holdout
             #    },
 
-            'saved_top_models_amount': 'All', # int or 'all' or 'the best' and other
+            'saved_top_models_amount': 'All',  # int or 'all' or 'the best' and other
         },
 
     'paths':

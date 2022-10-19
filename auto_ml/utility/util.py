@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import warnings
 import numbers
 import time
@@ -92,7 +90,7 @@ def cross_validate(estimator, X, y=None, groups=None, scoring=None, cv=None,
     X, y, groups = indexable(X, y, groups)
 
     cv = check_cv(cv, y, classifier=is_classifier(estimator))
-    scorers, _ = _check_multimetric_scoring(estimator, scoring=scoring)
+    scorers = _check_multimetric_scoring(estimator, scoring=scoring)
 
     # We clone the estimator to make sure that all the folds are
     # independent, and that it is pickle-able.

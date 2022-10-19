@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from time import perf_counter
 from models import ModelHolder
 import numpy as np
@@ -23,6 +21,8 @@ class ModelSelection:
         #  'all'      - try all options (3)
         #  GOAL: find single the best resampling and use as initial self.x, self.y
         self.initial_resampling = initial_resampling  # combine with balanced_accuracy metric ??
+
+        self.status = ''
 
         self.row_count = None
         self.columns_count = None  # all col (with target?)
@@ -307,7 +307,7 @@ class ModelSelection:
                         except:  # ValueError
                             print("Oops! Error...")
                             results = {}
-                            results['memory_fited'] = 9999999999
+                            results['memory_fited'] = 9999999999 # TODO change to math.inf if or redesign
                             results['inference_time'] = 9999999999
                             results['test_score'] = -9999999999
                     else:
@@ -357,8 +357,6 @@ class ModelSelection:
                     'model': None
                 }
 
-        # %%
-
         # Prepairing to search
         trials = Trials()
         hyper_space_list = []
@@ -375,13 +373,15 @@ class ModelSelection:
             self.status = 'OK'
         except hyperopt.exceptions.AllTrialsFailed:
             print('No solutions found. Try a different algorithm or change the requirements')
-            self.status = 'No solutions found'
+            self.status = 'no_solution'
+        except KeyboardInterrupt:
+            print('Execution stopped manually')
+            self.status = 'exit'
         # except:
         #    print('Unexpected error')
         #    self.status='Unexpected error'
 
-        # %%
-        if self.status == 'OK': # TODO remove this filter?
+        if self.status == 'OK':  # TODO remove this filter?
             # SAVE to EXCEL
             excel_results = []
             for res in trials.results:
