@@ -28,7 +28,8 @@ import pandas as pd
 __all__ = ['cross_validate', 'cross_val_score', 'split_val_score']
 
 
-#!!! IN CASE OF linear_model.LogisticRegressionCV YOU SHOULD MODIFY CV FUNCTION add parametr embeded CV or something else
+#!!! IN CASE OF linear_model.LogisticRegressionCV YOU SHOULD MODIFY CV FUNCTION
+# add parameter embedded CV or something else
 
 
 def split_val_score(estimator, X_train, X_test, Y_train, Y_test, scoring):

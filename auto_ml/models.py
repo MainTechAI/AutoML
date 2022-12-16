@@ -1,40 +1,25 @@
-"""
- add lightGBM
- add CatBoost
- add other from 'classifiers_moved_from_master.py'
-
-add INFO ABOUT DATASET like number of row, features etc
-"""
-
-"""   ABOUT HPO
-If multiple fidelities are applicable:
-(i.e., if it is possible to define substantially cheaper versions
-of the objective function of interest, such that the performance
-for these roughly correlates with the performance for the full
-objective function of  interest)
-    We  recommend  BOHB
-
-If multiple fidelities are not applicable:
-
-"""
-
 from hyperopt import hp
 import numpy as np
 
-np.random.seed(0)
+np.random.seed(42)
+
+"""
+add lightGBM
+add CatBoost (?)
+add other from 'classifiers_moved_from_master.py'
+add INFO ABOUT DATASET like number of row, features etc
+"""
 
 
 class ModelHolder:
-
     def __init__(self):
-
         self.all_models = [
             Perceptron(),
             Ridge(),
             PassiveAggressive(),
             LogisticRegression(),
-            LDA(),  # + ERROR
-            QDA(),  # + ERROR
+            LDA(),  # +
+            QDA(),  # +
             LinearSVC(),  # + часть по статье, часть auto-skl
             SVM(),  # + pm1c, по статье
             SGD(),
@@ -56,15 +41,13 @@ class ModelHolder:
             # TODO DBN(),
             # TODO FactorizationMachine(),
             # TODO PolynomialNetwork()
-
             # DummyClassifier() #??
         ]
 
     def get_approved_models(self, used_algorithms):
-
         approved_models = []
-
         used_names = []
+        models_verbose = []
         for name in used_algorithms:
             if used_algorithms.get(name) == True:
                 used_names.append(name)
@@ -72,8 +55,9 @@ class ModelHolder:
         for model in self.all_models:
             if model.short_name in used_names:
                 approved_models.append(model)
-                print(model.short_name)
+                models_verbose.append(model.short_name)
 
+        print('The following algorithms will be used in the search: ', models_verbose)
         return approved_models
 
     # estimators
@@ -82,9 +66,12 @@ class ModelHolder:
         # just all estimators
         for m in self.all_models:
             models.append((m.short_name, m.get_skl_estimator()))
-
         return models
 
+
+import uuid
+def unique_n(name):
+    return name + uuid.uuid4().hex[:6].upper()
 
 """
 #https://scikit-learn.org/stable/modules/kernel_approximation.html#kernel-approximation
@@ -93,7 +80,6 @@ from sklearn import svm
 
 
 class SVM:
-
     def __init__(self, ):
         """
         # sci article №1
@@ -112,7 +98,6 @@ class SVM:
 
         For both types of SVMs, the best performance can typically be achieved
           with low values of the gamma hyperparameter.
-
 
         # sci article №2
 
@@ -211,7 +196,6 @@ class LinearSVC:
 
 import xgboost
 
-
 class XGBoost:
     def __init__(self, ):
         """
@@ -257,7 +241,7 @@ class XGBoost:
             "n_estimators": [1, 5000],
             "learning_rate": [2 ** -10, 2 ** 0],  # eta
             "subsample": [0.1, 1],
-            # "booster":["gbtree","gblinear","dart"]
+            "booster": ["gbtree", "gblinear", "dart"],  # #
             "max_depth": [1, 15],
             "min_child_weight": [2 ** 0, 2 ** 7],  # 2**x
             "colsample_bytree": [0, 1],
@@ -270,11 +254,10 @@ class XGBoost:
 
         self.search_space = {
             'name': 'XGBoost',
-            'scale': None,  # hp.choice('XGBoost_scale_1',[True,False]), #needless
+            'scale': None,
             'model': xgboost.XGBClassifier,
             'param': {
                 # "n_estimators":hp.randint('XGBoost_p1', 500), # was 5000
-                "learning_rate": hp.loguniform('XGBoost_p2', -6.931, 0),
                 # "subsample":hp.uniform('XGBoost_p3', 0.1, 1),
                 # "booster": hp.choice('XGBoost_p4', ["gbtree","gblinear","dart"]),
                 # 'max_depth': hp.choice('XGBoost_p5',range(1,15)),
@@ -283,6 +266,15 @@ class XGBoost:
                 # "colsample_bylevel":hp.uniform('XGBoost_p8', 0,1),
                 # "reg_lambda":hp.loguniform('XGBoost_p9', -6.931, 6.931),
                 # "reg_alpha":hp.loguniform('XGBoost_p10', -6.931, 6.931),
+                'eval_metric': 'mlogloss',
+                "learning_rate": hp.loguniform('XGBoost_p2', -6.931, 0),
+                'max_depth': ('XGBoost_p5', range(1, 15)),
+                'gamma': ('gamma', 1, 9),
+                'reg_alpha': ('reg_alpha', 40, 180, 1),
+                'reg_lambda': ('reg_lambda', 0, 1),
+                'colsample_bytree': ('colsample_bytree', 0.5, 1),
+                'min_child_weight': ('min_child_weight', 0, 10, 1),
+                'n_estimators': ('XGBoost_p1', 500),
             }
         }
 
@@ -695,14 +687,11 @@ from sklearn import tree
 
 # pruning (better accuracy on test set)
 # https://scikit-learn.org/stable/auto_examples/tree/plot_cost_complexity_pruning.html#sphx-glr-auto-examples-tree-plot-cost-complexity-pruning-py
-
-
 class DecisionTree:
     def __init__(self, ):
         """
         Description
         """
-
         self.name = 'Decision tree classifier'
         self.short_name = 'DecisionTree'
 
@@ -728,7 +717,17 @@ class DecisionTree:
         self.search_space = {
             'name': 'DecisionTree',
             'model': tree.DecisionTreeClassifier,
-            'param': None
+            'param': {
+                'criterion': hp.choice(unique_n('DecisionTree_criterion'), ['gini', 'entropy']),
+                'splitter': hp.choice(unique_n('DecisionTree_splitter'), ["best", "random"]),
+                'max_depth': hp.pchoice(unique_n('DecisionTree_max_depth'), [(0.7, None), (0.1, 2), (0.1, 3), (0.1, 4)]),
+                'min_samples_split': hp.pchoice(unique_n('DecisionTree_min_samples_split'), [(0.95, 2), (0.05, 3)]),
+                'min_weight_fraction_leaf': hp.pchoice(unique_n('DecisionTree_min_weight_fraction_leaf'),
+                                                       [(0.95, 0.0), (0.05, 0.01)]),
+                'max_features': hp.pchoice(unique_n('DecisionTree_max_features'), [(0.2, "sqrt"), (0.1, "log2"),
+                                                                         (0.1, None),
+                                                                         (0.6, hp.uniform(unique_n("DT_max_f"), 0., 1.))])
+            }
         }
 
     def get_skl_estimator(self, **default_parameters):
@@ -785,11 +784,12 @@ class BaggingSVC:  # только Bagging только SVC(kernel=rbf)
             "max_features": 1.0,
             "bootstrap": True,
             "bootstrap_features": False,
-            # "oob_score":False,
-            # "warm_start":False,
-            # "n_jobs":None,
-            # "random_state":None,
-            # "verbose":0
+
+            "oob_score":False,
+            "warm_start":False,
+            "n_jobs":None,
+            "random_state":None,
+            "verbose":0
         }
 
         # Gausian kernel (RBF)
@@ -799,21 +799,36 @@ class BaggingSVC:  # только Bagging только SVC(kernel=rbf)
             'model': ensemble.BaggingClassifier,
             "scale": hp.choice('Bagging(SVС)_scale', [True, False]),
             'param': {
-                "base_estimator": {
-                    "model": svm.SVC,  # можно наверное усложнить и добавить больше параметров
-                    "kernel": 'rbf',
-                    'gamma': hp.pchoice('Bagging(SVС)_p1_gamma', [(0.05, 'scale'), (0.05, 'auto'),
-                                                                  (0.9,
-                                                                   hp.loguniform('Bagging(SVС)_p1_gamma_sub', -10.4,
-                                                                                 2.08))]),
-                    'C': hp.loguniform('Bagging(SVС)_p1_C', -3.46, 4),
-                },
-                "n_estimators": hp.choice('Bagging(SVС)_p2', [4, 8, 16, 32, 64]),
-                # и так дефолтные нет смысла передовать
-                # "max_samples":1.0,
-                # "max_features":1.0,
-                # "bootstrap":True,
-                # "bootstrap_features":False,
+                "bootstrap": hp.choice('Bagging(SVС)_bootstrap', [True, False]),
+                "n_estimators": hp.choice('Bagging(SVС)_n_estimators', [4, 8, 16, 32, 64]),
+                "max_features": hp.pchoice('Bagging(SVС)_max_features', [(0.05, 0.8), (0.15, 0.9), (0.8, 1.0)]),
+                "max_samples": hp.pchoice('Bagging(SVС)_max_samples', [(0.05, 0.8), (0.15, 0.9), (0.8, 1.0)]),
+                "bootstrap_features": hp.choice('Bagging(SVС)_bootstrap_features', [True, False]),
+                "base_estimator": hp.choice('Bagging(SVС)_base_estimator',[
+                    {
+                        "model": svm.SVC,
+                        "param": {
+                            "kernel": 'rbf',
+                            'gamma': hp.pchoice('Bagging(SVС)_p1_gamma', [(0.05, 'scale'), (0.05, 'auto'),
+                                                                          (0.9,
+                                                                           hp.loguniform('Bagging(SVС)_p1_gamma_sub',
+                                                                                         -10.4, 2.08))]),
+                            'C': hp.loguniform('Bagging(SVС)_p1_C', -3.46, 4),
+                        }
+                    },
+                    {
+                        "model": DecisionTree().search_space['model'],
+                        "param": DecisionTree().search_space['param']
+                    },
+                    {
+                        "model": LinearSVC().search_space['model'],
+                        "param": LinearSVC().search_space['param']
+                    }
+
+                    # TODO you can add any other classifier
+
+                ])
+
             }
         }
 
@@ -940,7 +955,8 @@ class xRandTrees:
             'param': {
                 'max_features': hp.uniform('xRandTrees_p1', 0.1, 0.9),
                 'min_samples_leaf': 1 + hp.randint('xRandTrees_p2', 20),
-                'bootstrap': hp.choice('xRandTrees_p3', [True, False])
+                'bootstrap': hp.choice('xRandTrees_p3', [True, False]),
+                "min_samples_split": hp.pchoice('xRandTrees_p4', [(0.95, 2), (0.05, 3), ])
             }
         }
 
@@ -981,7 +997,7 @@ class AdaBoost:
         self.parameters_range = {
             "learning_rate": [0.01, 2.0],  # (log-scale)
             "base_estimator": DecisionTree().get_skl_estimator(
-                max_depth=[1, 10])  # !!! как тут быть? nested? (10 optimal maybe need more)
+                max_depth=[1, 10])  # (10 optimal maybe need more)
         }
 
         self.hpo_results = []
@@ -991,10 +1007,9 @@ class AdaBoost:
             'model': ensemble.AdaBoostClassifier,
             'param': {
                 "learning_rate": hp.uniform('AdaBoost_p1', 0.01, 2.0),
-                "base_estimator": {  # если захочу добавить другой базовый алгоритм то hp.choise
-                    "name": 'DecisionTree',
-                    "model": tree.DecisionTreeClassifier,
-                    "max_depth": 1 + hp.randint('AdaBoost_p2', 12)
+                "base_estimator": {
+                    "model": DecisionTree().search_space['model'],
+                    "param": DecisionTree().search_space['param']
                 }
             }
         }
@@ -1047,10 +1062,10 @@ class HistGB:
             'model': ensemble.HistGradientBoostingClassifier,
             'param': {
                 "learning_rate": hp.loguniform('HistGBp1', -7, 0),
-                # "max_iter":30+hp.randint('HistGBp2', 450),
-                # 'max_depth': hp.choice('HistGBp3',[None,2+hp.randint('HistGBp3_1', 15) ] ),
-                # 'min_samples_leaf':5+hp.randint('HistGBp4',30),
-                # 'l2_regularization':hp.choice('HistGBp5',[0,0.1,0.01,0.001 ] ),
+                "max_iter":30+hp.randint('HistGBp2', 250),
+                'l2_regularization': hp.choice('HistGBp5', [0, 0.1, 0.01, 0.001]),
+                'min_samples_leaf':5+hp.randint('HistGBp4',30),
+                'max_depth': hp.choice('HistGBp3', [None, 2 + hp.randint('HistGBp3_1', 15)]),
             }
         }
 
@@ -1107,6 +1122,7 @@ class LabelSpreading:
 
 
 from sklearn import neural_network
+
 
 class MLP:
     def __init__(self, ):

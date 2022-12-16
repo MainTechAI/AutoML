@@ -39,7 +39,7 @@ dependencies:
   - python-dateutil
   - python_abi
   - pytz
-  - py-xgboost
+  - py-xgboost<=1.5.0
   - qt>=5.12.5
   - scikit-learn
   - scipy
@@ -55,3 +55,8 @@ dependencies:
   - wheel
   - wincertstore
   - zlib
+  - pip:
+    - gower==0.1.2
+    - igraph==0.10.2
+    - pymfe==0.4.2
+    - texttable==1.6.7

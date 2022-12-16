@@ -1,15 +1,15 @@
 import numpy as np
 
-def encode_y_ELM_binary(y_input):
-    # current ELM realisation requires 1 and -1 as 'y' values
-    # TODO use other ELM package, or rewrite current
-    y = y_input.copy()
-    for i in range(len(y)):
-        if y[i] == y[0]:
-            y[i] = 1
-        else:
-            y[i] = -1
-    return y.astype(np.int8)
+# def encode_y_ELM_binary(y_input):
+#     # current ELM realisation requires 1 and -1 as 'y' values
+#     # TODO use other ELM package, or rewrite current
+#     y = y_input.copy()
+#     for i in range(len(y)):
+#         if y[i] == y[0]:
+#             y[i] = 1
+#         else:
+#             y[i] = -1
+#     return y.astype(np.int8)
 
 
 class DataPreprocessing:
@@ -32,14 +32,14 @@ class DataPreprocessing:
         # DEBUG
         print(self.DS)
         print(self.categ_col)
-        # return pandas, IDK why
+        # returns pandas, IDK why
 
     def preproc_txt(self):
         # TODO
         pass
 
     def get_x(self):
-        # if cat col exist encode
+        # if cat col exist, then encode
         if len(self.categ_index) != 0:
 
             self.encode_cat_col()
