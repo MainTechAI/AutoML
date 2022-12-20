@@ -60,7 +60,7 @@ if __name__ == "__main__":
             # qsar-biodeg dataset. Data set containing values for 41 attributes (molecular descriptors) used to classify
             # 1055 chemicals into 2 classes (ready and not ready biodegradable).
             # Only numerical features.
-            DS_path = r'C:\Users\Trogwald\Desktop\push_it\AutoML\experiments\DS_CD\2 classes\biodeg.csv'
+            DS_path = r'.\experiments\DS_CD\2 classes\biodeg.csv'
             DS = pd.read_csv(DS_path, skiprows=0).values
             x = DS[:, 0:41]
             y = DS[:, 41]
@@ -73,7 +73,7 @@ if __name__ == "__main__":
         if test_case == 2:
             # Fisher's Iris data set. 3 classes.
             # The dataset is balanced
-            DS_path = r'C:\Users\Trogwald\Desktop\push_it\AutoML\experiments\DS_CD\3 classes\iris.csv'
+            DS_path = r'.\experiments\DS_CD\3 classes\iris.csv'
             DS = pd.read_csv(DS_path, skiprows=0).values
             x = DS[:, 0:4]
             y = DS[:, 4]
@@ -98,7 +98,7 @@ if __name__ == "__main__":
             # German credit dataset. This dataset classifies people described by a set of attributes
             # as good or bad credit risks. 2 classes. 1000 rows. 7 numeric and 14 categorical features.
             # There are both numerical and categorical features
-            DS_path = r'C:\Users\Trogwald\Desktop\push_it\AutoML\experiments\DS_CD\2 classes\credit-g.csv'
+            DS_path = r'.\experiments\DS_CD\2 classes\credit-g.csv'
             DS = pd.read_csv(DS_path, skiprows=0).values
             x = DS[:, 0:20]
             y = DS[:, 20]
@@ -115,7 +115,7 @@ if __name__ == "__main__":
             # German credit dataset (modified). This dataset classifies people described by a set of attributes
             # as good or bad credit risks. 2 classes. 1000 rows. 7 numeric and 14 categorical features.
             # There are only categorical features
-            DS_path = r'C:\Users\Trogwald\Desktop\push_it\AutoML\experiments\DS_CD\2 classes\credit-g.csv'
+            DS_path = r'.\experiments\DS_CD\2 classes\credit-g.csv'
             DS = pd.read_csv(DS_path, skiprows=0).values
             x = DS[:, [0, 2, 3, 5, 6, 8, 9, 11, 13, 14, 16, 18, 19]]
             y = DS[:, 20]

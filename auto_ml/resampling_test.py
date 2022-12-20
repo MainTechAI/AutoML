@@ -62,7 +62,7 @@ if __name__ == "__main__":
             # 'under'    KNN           0.980  [('NRB', 412), ('RB', 355)]
             # 'over'     SVM           0.900  [('RB', 699), ('NRB', 699)]
             # 'combined' XGBoost       0.995  [('NRB', 446), ('RB', 555)]
-            DS_path = r'C:\Users\Trogwald\Desktop\push_it\AutoML\experiments\DS_CD\2 classes\biodeg.csv'
+            DS_path = r'.\experiments\DS_CD\2 classes\biodeg.csv'
             DS = pd.read_csv(DS_path, skiprows=0).values
             x = DS[:, 0:41]
             y = DS[:, 41]
@@ -80,7 +80,7 @@ if __name__ == "__main__":
             # 'under'    SVM_1.0           ('Iris-setosa', 49), ('Iris-versicolor', 47), ('Iris-virginica', 47)
             # 'over'     KNeighbors_0.966  ('Iris-setosa', 50), ('Iris-versicolor', 50), ('Iris-virginica', 50)
             # 'combined' SVM_1.0           ('Iris-setosa', 50), ('Iris-versicolor', 45), ('Iris-virginica', 44)
-            DS_path = r'C:\Users\Trogwald\Desktop\push_it\AutoML\experiments\DS_CD\3 classes\iris.csv'
+            DS_path = r'.\experiments\DS_CD\3 classes\iris.csv'
             DS = pd.read_csv(DS_path, skiprows=0).values
             x = DS[:, 0:4]
             y = DS[:, 4]
@@ -115,7 +115,7 @@ if __name__ == "__main__":
             # 'under'    KNeighbors_0.9292929292929293 [('bad', 300), ('good', 194)]
             # 'over'     XGBoost_0.8785714285714286    [('bad', 699), ('good', 699)]
             # 'combined' KNeighbors_0.97               [('bad', 291), ('good', 206)]
-            DS_path = r'C:\Users\Trogwald\Desktop\push_it\AutoML\experiments\DS_CD\2 classes\credit-g.csv'
+            DS_path = r'.\experiments\DS_CD\2 classes\credit-g.csv'
             DS = pd.read_csv(DS_path, skiprows=0).values
             x = DS[:, 0:20]
             y = DS[:, 20]
@@ -137,7 +137,7 @@ if __name__ == "__main__":
             # 'under'     [('bad', 300), ('good', 194)]
             # 'over'      [('bad', 699), ('good', 699)]
             # 'combined'  [('bad', 291), ('good', 206)]
-            DS_path = r'C:\Users\Trogwald\Desktop\push_it\AutoML\experiments\DS_CD\2 classes\credit-g.csv'
+            DS_path = r'.\experiments\DS_CD\2 classes\credit-g.csv'
             DS = pd.read_csv(DS_path, skiprows=0).values
             x = DS[:, [0, 2, 3, 5, 6, 8, 9, 11, 13, 14, 16, 18, 19]]
             y = DS[:, 20]

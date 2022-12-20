@@ -434,7 +434,8 @@ class ModelSelection:
                         #if 'oml-python:serialized_object' in params[key]:
                         #    continue
                         #print(params[key], type(params[key]))
-                        params[key] = eval(params[key], exceptions)
+                        # TODO change it to ast.literal_eval
+                        #params[key] = eval(params[key], exceptions)
                     search_space_meta.append(['AdaBoost', ensemble.AdaBoostClassifier, params])
 
             if self.used_algorithms['MLP']:
@@ -444,8 +445,8 @@ class ModelSelection:
                 print(df_hps.to_string())
                 for params in df_hps.to_dict('records'):
                     for key in params.keys():
-                        # TODO change it ast.literal_eval
-                        params[key] = eval(params[key], exceptions)
+                        # TODO change it to ast.literal_eval
+                        # params[key] = eval(params[key], exceptions)
                     search_space_meta.append(['MLP', neural_network.MLPClassifier, params])
 
             if self.used_algorithms['RandomForest']:
@@ -457,7 +458,7 @@ class ModelSelection:
                 for params in df_hps.to_dict('records'):
                     for key in params.keys():
                         # TODO change it to ast.literal_eval
-                        params[key] = eval(params[key], exceptions)
+                        #params[key] = eval(params[key], exceptions)
                     search_space_meta.append(['RandomForest', ensemble.RandomForestClassifier, params])
 
             if self.used_algorithms['SVM']:
@@ -468,7 +469,7 @@ class ModelSelection:
                 for params in df_hps.to_dict('records'):
                     for key in params.keys():
                         # TODO change it to ast.literal_eval
-                        params[key] = eval(params[key], exceptions)
+                        # params[key] = eval(params[key], exceptions)
                     search_space_meta.append(['SVM', svm.SVC, params])
 
             # hp.choice or/and new fmin + Trials that will be reused
