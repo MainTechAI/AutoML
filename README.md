@@ -25,11 +25,5 @@ The best N models will be serialized in pickle format and saved in the results f
 More information [pdf](http://omega.sp.susu.ru/publications/bachelorthesis/2019_403_shchukinma.pdf), [slides](http://omega.sp.susu.ru/publications/bachelorthesis/2019_403_shchukinma_slides.pdf) (in Russian)
 
 
-_____
 
-- [ ] Fix the data preprocessing function used in the GUI.
-- [ ] API updates is a top priority (GUI last)
-- [ ] Describe what the application is intended for
-- [ ] Add screenshots
-- [ ] Data loading. Add other column separators. Not only comma.
 
