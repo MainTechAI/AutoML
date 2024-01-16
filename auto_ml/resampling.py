@@ -6,13 +6,14 @@ from collections import Counter
 
 def resample_data(x, y, num_features, cat_features, rtype):
     """
-    res_type: str
      'under'    - Under-sampling
      'over'     - Over-sampling
      'combined' - Over-sampling combined with under-sampling
      'auto'     - try to automatically find the best resampling strategy
-     self.x, self.y are returned after resampling
+
+     returns x and y after resampling
     """
+
     rand = 42
     numeric = len(num_features) != 0
     categorical = len(cat_features) != 0
@@ -25,7 +26,6 @@ def resample_data(x, y, num_features, cat_features, rtype):
         rtype = 'over'
         print('samples <= features, resampling strategy replaced to over-sampling')
 
-    # resampling algorithms
     if rtype == 'under':
         if (numeric is True) & (categorical is False):
             print('AllKNN is used for resampling')
@@ -37,6 +37,7 @@ def resample_data(x, y, num_features, cat_features, rtype):
             x, y = rs.fit_resample(x, y)
         else:
             raise Exception("There is no categorical or numeric features")
+
     elif rtype == 'over':
         if (numeric is True) & (categorical is False):
             print('SMOTE is used for resampling')
@@ -52,6 +53,7 @@ def resample_data(x, y, num_features, cat_features, rtype):
             x, y = smoten.fit_resample(x, y)
         else:
             raise Exception("There is no categorical or numeric features")
+
     elif rtype == 'combined':
         if (numeric is True) & (categorical is False):
             print('SMOTEENN is used for resampling')
@@ -71,8 +73,10 @@ def resample_data(x, y, num_features, cat_features, rtype):
             x, y = rs.fit_resample(x, y)
         else:
             raise Exception("There is no categorical or numeric features")
+
     elif rtype == 'auto':
         raise Exception("Not implemented")
+
     else:
         raise Exception("Wrong resampling type")
 

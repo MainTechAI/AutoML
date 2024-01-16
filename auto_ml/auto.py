@@ -302,7 +302,7 @@ class ModelSelection:
                 time_all = perf_counter() - start_timer
 
             loss = (-accuracy)
-            # monitoring
+            # DEBUG
             print(accuracy)
             print('')
 

@@ -1,5 +1,5 @@
 # AutoML
-
+The project was made in 2020.
 ### Installation
 ```
 git clone https://github.com/MainTechAI/AutoML.git
