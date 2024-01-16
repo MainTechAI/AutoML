@@ -24,10 +24,8 @@ used_algo = {
     'GaussianProcess': False,
     'GaussianNB': True,
     'Bagging(SVС)': False,
-
     'LabelSpreading': False,
     'BernoulliNB': False,
-
     'DBN': False,
     'FactorizationMachine': False,
     'PolynomialNetwork': False,

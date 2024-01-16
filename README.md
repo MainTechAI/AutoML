@@ -24,6 +24,13 @@ The best N models will be serialized in pickle format and saved in the results f
 
 More information [pdf](http://omega.sp.susu.ru/publications/bachelorthesis/2019_403_shchukinma.pdf), [slides](http://omega.sp.susu.ru/publications/bachelorthesis/2019_403_shchukinma_slides.pdf) (in Russian)
 
+___
+### Special assignment
+During my studies at LUT, I extended the functionality of this project by adding:
+* A meta-learning approach that populates the hyperparameter space with the most promising hyperparameters..
+* Ensemble learning algorithms, namely bagging and voting.
+* Imbalanced data handling algorithms that perform over-sampling and/or under-sampling.
 
-
+The new functionality is not present in the GUI and is only accessible through API calls. 
+Examples can be found [here](https://github.com/MainTechAI/AutoML/tree/master/auto_ml/examples).
 

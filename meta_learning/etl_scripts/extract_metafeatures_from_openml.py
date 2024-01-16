@@ -1,11 +1,12 @@
-# this script computes meta-features for all datasets in a given study(collection of datasets)
-# then, preprocesses them
+# this script computes meta-features for all datasets in a given Study(collection of datasets)
+# and then, preprocesses them
 import openml
 import pandas as pd
-import numpy as np
 from pymfe.mfe import MFE
+import os
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
+# TODO: change absolute paths to relative ones
 
 
 study_id = 1  # ~500 instances of classification datasets
@@ -104,11 +105,11 @@ study1_metafeatures.to_csv(folder+'study1_metafeatures.csv',index=False)
 
 
 #######################################
-# the resulting file contains all dataset from Study11
-# but some of the datasets need to be removed, as there are no TID for them
+# the resulting file contains all datasets from Study11
+# but some of the datasets need to be removed, as there are no TIDs for them
 #######################################
 
-import os
+
 folder = r"C:\Users\Trogwald\Desktop\push_it\AutoML\meta_learning\\"
 
 

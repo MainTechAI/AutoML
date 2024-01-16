@@ -11,6 +11,7 @@ import numpy as np
 import pandas as pd
 import os
 import joblib
+import hyperopt
 from hyperopt import tpe, hp, fmin, STATUS_OK, Trials
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
@@ -29,13 +30,11 @@ class ModelSelection:
                  used_algorithms, metric, validation, iterations,
                  resampling=None, metalearning=False, mlr_n=1, ensembling=False, n_estimators='all', max_jobs=1):
         print('Loading started')
-
-        self.resampling = resampling  # combine with balanced_accuracy metric ??
+        self.resampling = resampling
         self.metalearning = metalearning
         self.mlr_n = mlr_n
         self.ensembling = ensembling
         self.n_estimators = n_estimators
-
         self.status = ''
 
         self.original_x = None
@@ -44,14 +43,13 @@ class ModelSelection:
         self.original_cat_cols = None
 
         self.row_count = None
-        self.columns_count = None  # all col (with target?)
+        self.columns_count = None
         self.target_column = None
         self.cat_columns = []
         self.path_to_save = None
 
         self.max_jobs = max_jobs
-        self.CV_jobs = self.max_jobs  # fast solution TODO make better, kinda like resource manager
-        # !!!  DEV
+        self.CV_jobs = self.max_jobs
 
         self.experiment_name = experiment_name
         self.duration = duration
@@ -65,7 +63,7 @@ class ModelSelection:
         self.validation = validation
 
         # tested: accuracy, roc_auc, balanced_accuracy
-        # but currently some problems with f1, recall, precision
+        # currently there are some problems with f1, recall, precision
         self.metric = metric
         self.metric_original = metric
         if self.metric == 'f1_micro':
@@ -73,8 +71,6 @@ class ModelSelection:
         if self.metric == 'f1_macro':
             self.metric = make_scorer(f1_score, greater_is_better=True, average="macro")
 
-
-        # self.time_end = perf_counter() + duration
         self.valtype = ''
         self.cv_splits = None
 
@@ -93,41 +89,24 @@ class ModelSelection:
             self.valtype = 'H'
 
         self.models = ModelHolder().get_approved_models(self.used_algorithms)
-
         print('Loading ended')
         print()
 
-    # def check_time(self):
-    #     if self.time_end > perf_counter():
-    #         return True
-    #     else:
-    #         return False
-
     def fit(self, x, y, num_features=[], cat_features=[], txt_features=[]):
-        """
-        x may include 'y' and any other even unused columns
-        """
         self.original_x = x.copy()
         self.original_y = y.copy()
         self.original_num_cols = num_features.copy()
         self.original_cat_cols = cat_features.copy()
         print('Original x shape', self.original_x.shape, 'y shape', self.original_y.shape)
-
         self.x = x.copy()
         self.y = y.copy()
 
-        # TODO test
-        # if a numeric feature treated as a categorical, category_encoders will throw an error
+        # If a numeric feature treated as a categorical, category_encoders will throw an error
         # AttributeError: 'numpy.ndarray' object has no attribute 'columns'
         if len(cat_features) != 0:
             from category_encoders import OrdinalEncoder
             enc = OrdinalEncoder(cols=cat_features, return_df=False).fit(x.copy())
             self.x = enc.transform(self.x.copy())
-            # from data_preprocessing import DataPreprocessing
-            # preproc = DataPreprocessing(x, num_features, cat_features)
-            # self.x = preproc.get_x()
-            # self.y = y
-            # self.nrows, self.ncol = self.x.shape # TODO ?
             print('Data preprocessing ended')
             print('Preprocessed x shape', self.x.shape, 'y shape', self.y.shape)
 
@@ -140,32 +119,16 @@ class ModelSelection:
             print('RESAMPLING ended')
             print()
 
-        # TODO DEV
-        # from data_preprocessing import encode_y_ELM_binary
-        # if self.used_algorithms['ELM'] == True:
-        #     self.y_ELM = encode_y_ELM_binary(self.y)
-        #     self.x_ELM = self.x.copy()
-        #     self.x_ELM = self.x_ELM.astype(np.float64)
-
         # TODO change
-        # if validation == holdout
         if self.valtype == 'H':
             self.x_train, self.x_test, self.y_train, self.y_test = \
                 train_test_split(self.x, self.y, test_size=0.2)
-
             if self.used_algorithms['ELM'] == True:
                 self.x_train_ELM, self.x_test_ELM, self.y_train_ELM, \
                 self.y_test_ELM = train_test_split(self.x.astype(np.float64),
                                                    self.y_ELM, test_size=0.2)
 
-        # %%
         def objective_func(args):
-            # if self.check_time() == True:
-
-            # every commented parametr worsen performans on G-credit
-            # better without them
-
-            # debug
             print(args['name'], args['param'])
             model_name = args['name']
 
@@ -187,12 +150,6 @@ class ModelSelection:
                     learning_rate=args['param']['learning_rate'],
                     eval_metric=args['param']['eval_metric']
                 )
-                # less efficient
-                # booster=args['param']['booster'], n_estimators=args['param']['n_estimators'],
-                # subsample=args['param']['subsample'], max_depth=args['param']['max_depth'],
-                # min_child_weight=args['param']['min_child_weight'], colsample_bytree=args['param']['colsample_bytree'],
-                # colsample_bylevel=args['param']['colsample_bylevel'], reg_lambda=args['param']['reg_lambda'],
-                # reg_alpha=args['param']['reg_alpha'],
 
             elif args['name'] == 'RandomForest':
                 clf = args['model'](
@@ -209,7 +166,6 @@ class ModelSelection:
                 base = args['param']['base_estimator']['model']()
                 base.set_params(**args['param']['base_estimator']['param'])
                 args['param']['base_estimator'] = base
-
                 clf = args['model']()
                 clf.set_params(**args['param'])
 
@@ -258,14 +214,13 @@ class ModelSelection:
                     solver=args['param']['solver'],
                     shrinkage=args['param']['shrinkage'],
                     tol=args['param']['tol'],
-                    # priors, n_components, store_covariance не нужены
+                    # priors, n_components, store_covariance are not necessary
                 )
 
             elif args['name'] == 'QDA':
                 clf = args['model'](
                     reg_param=args['param']['reg_param'],
                 )
-
             elif args['name'] == 'DecisionTree':
                 clf = args['model']()
                 clf.set_params(**args['param'])
@@ -278,21 +233,12 @@ class ModelSelection:
                 clf = args['model']()
                 #clf.set_params(**args['param'])
 
-            # elif args['name'] == 'ELM':
-            #     # TODO -1 1
-            #     clf = args['model'](
-            #         hid_num=int(args['param']['hid_num']),
-            #         a=args['param']['a'],
-            #     )
-
             elif args['name'] == 'Bagging(SVС)':  # rbf
                 base = args['param']['base_estimator']['model']()
                 base.set_params(**args['param']['base_estimator']['param'])
                 args['param']['base_estimator'] = base
-
                 clf = args['model']()
                 clf.set_params(**args['param'])
-
                 if args['scale'] == True:
                    clf = make_pipeline(StandardScaler(), clf)
 
@@ -301,31 +247,26 @@ class ModelSelection:
                 clf.set_params(**args['param'])
 
             elif args['name'] == 'MetaLearning':
-                # TODO make it for every algorithm
                 clf = args['param'][1]()
                 clf.set_params(**args['param'][2])
                 model_name = model_name + args['param'][0]
-                # sklearn.base.clone()
 
             else:
                 clf = args['model']()
+                # TODO: raise exception
                 #raise ValueError('Something wrong with this estimator')
                 #clf.set_params(**args['param'])
-                # TODO add other instead of this
 
-            # %%
             if self.valtype == 'CV':
                 start_timer = perf_counter()
-
                 if args['name'] == 'ELM':
-                    # if ValueError
                     try:
                         cv_results = cross_val_score(clf, self.x_ELM, self.y_ELM, cv=self.kfold,
                                                      scoring=self.metric, n_jobs=self.CV_jobs)
-                    except:  # ValueError
+                    except:
                         print("Oops! Error...")
                         cv_results = {}
-                        cv_results['memory_fited'] = np.array([9999999999, 9999999999])
+                        cv_results['memory_fited'] = np.array([9999999999, 9999999999]) # TODO: change to math.inf
                         cv_results['inference_time'] = np.array([9999999999, 9999999999])
                         cv_results['test_score'] = np.array([-9999999999, -9999999999])
                 else:
@@ -341,14 +282,14 @@ class ModelSelection:
                 start_timer = perf_counter()
 
                 if args['name'] == 'ELM':
-                    # TODO ValueError
+                    # TODO: add ValueError
                     try:
                         results = split_val_score(clf, self.x_train_ELM, self.x_test_ELM, self.y_train_ELM,
                                                   self.y_test_ELM, scoring=self.metric)
                     except:  # ValueError
                         print("Oops! Error...")
                         results = {}
-                        results['memory_fited'] = 9999999999  # TODO change to math.inf or redesign
+                        results['memory_fited'] = 9999999999  # TODO: change to math.inf
                         results['inference_time'] = 9999999999
                         results['test_score'] = -9999999999
                 else:
@@ -360,19 +301,17 @@ class ModelSelection:
                 accuracy = results['test_score']
                 time_all = perf_counter() - start_timer
 
-            # %%
             loss = (-accuracy)
-
             # monitoring
             print(accuracy)
             print('')
 
-            # TODO: it works, but it's better to test cases when model doesn't satisfy requirements
             # Model requirements check
             if (accuracy < self.min_accuracy or mem > self.max_model_memory or
                     pred_time > self.max_prediction_time or time_all > self.max_train_time):
                 loss = 999
-                # status = STATUS_OK #STATUS_FAIL
+                # TODO: better to change status
+                # status = STATUS_FAIL
 
             status = STATUS_OK
 
@@ -398,8 +337,6 @@ class ModelSelection:
         ##################################################
         if self.metalearning == True:
             metafeatures = extract_meta_features(self.x, self.y, self.original_cat_cols)
-            #print(metafeatures)
-            #print(len(metafeatures))
             closest_dids = get_nearest_dids(metafeatures)
 
             search_space_meta = []
@@ -412,30 +349,21 @@ class ModelSelection:
                 'sqrt': 'sqrt',
                 'DecisionTreeClassifier':DecisionTreeClassifier,'gini':'gini','entropy':'entropy','log_loss':'log_loss',
                 'best':'best','random':'random', 'log2':'log2','balanced':'balanced',
-                #'min_impurity_split':'min_impurity_split'
                 'ExtraTreeClassifier':ExtraTreeClassifier
             }
 
             if self.used_algorithms['AdaBoost']:
                 print('\nAdaBoost: meta-learning started')
                 df_hps = EvalParserAdaBoost.get_optimal_hyperparameters_adaboost(closest_dids, self.mlr_n, 'automl', False)
-                # TODO estimator
                 df_hps = df_hps.drop(columns=['function', 'value'])
                 print(df_hps.to_string())
                 for params in df_hps.to_dict('records'):
                     for key in params.keys():
-                        # TODO change it to ast.literal_eval
                         params[key] = re.sub(r'min_impurity_split=[+-]?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?,', '', params[key])
                         params[key] = re.sub(r'presort=False,', '', params[key],flags=re.IGNORECASE)
                         params[key] = re.sub(r'presort=True,', '', params[key],flags=re.IGNORECASE)
-                        #params[key] = re.sub(r' +', ' ', params[key],flags=re.IGNORECASE)
-                        #params[key] = " ".join(params[key].split())
-                        #params[key] = re.sub(r'\n', '', params[key],flags=re.IGNORECASE)
-                        #if 'oml-python:serialized_object' in params[key]:
-                        #    continue
-                        #print(params[key], type(params[key]))
-                        # TODO change it to ast.literal_eval
-                        #params[key] = eval(params[key], exceptions)
+                        # TODO: change it to ast.literal_eval
+                        params[key] = eval(params[key], exceptions)
                     search_space_meta.append(['AdaBoost', ensemble.AdaBoostClassifier, params])
 
             if self.used_algorithms['MLP']:
@@ -445,8 +373,8 @@ class ModelSelection:
                 print(df_hps.to_string())
                 for params in df_hps.to_dict('records'):
                     for key in params.keys():
-                        # TODO change it to ast.literal_eval
-                        # params[key] = eval(params[key], exceptions)
+                        # TODO: change it to ast.literal_eval
+                        params[key] = eval(params[key], exceptions)
                     search_space_meta.append(['MLP', neural_network.MLPClassifier, params])
 
             if self.used_algorithms['RandomForest']:
@@ -457,8 +385,8 @@ class ModelSelection:
                 print(df_hps.to_string())
                 for params in df_hps.to_dict('records'):
                     for key in params.keys():
-                        # TODO change it to ast.literal_eval
-                        #params[key] = eval(params[key], exceptions)
+                        # TODO: change it to ast.literal_eval
+                        params[key] = eval(params[key], exceptions)
                     search_space_meta.append(['RandomForest', ensemble.RandomForestClassifier, params])
 
             if self.used_algorithms['SVM']:
@@ -468,11 +396,11 @@ class ModelSelection:
                 print(df_hps.to_string())
                 for params in df_hps.to_dict('records'):
                     for key in params.keys():
-                        # TODO change it to ast.literal_eval
-                        # params[key] = eval(params[key], exceptions)
+                        # TODO: change it to ast.literal_eval
+                        params[key] = eval(params[key], exceptions)
                     search_space_meta.append(['SVM', svm.SVC, params])
 
-            # hp.choice or/and new fmin + Trials that will be reused
+            # TODO: add hp.choice or/and new fmin + Trials that will be reused
             dict_meta = {
                 'name': 'MetaLearning',
                 'param': hp.choice('Algorithm_Params', search_space_meta)
@@ -483,7 +411,6 @@ class ModelSelection:
         space = hp.choice('classifier', hyper_space_list)
 
         # Start search
-        import hyperopt
         try:
             fmin(objective_func, space, algo=tpe.suggest,
                  max_evals=self.iterations, trials=trials, timeout=self.duration)
@@ -494,11 +421,8 @@ class ModelSelection:
         except KeyboardInterrupt:
             print('Execution stopped manually')
             self.status = 'exit'
-        # except:
-        #    print('Unexpected error')
-        #    self.status='Unexpected error'
 
-        if self.status == 'OK':  # TODO remove this filter? upd. why?
+        if self.status == 'OK':
             # SAVE to EXCEL
             excel_results = []
             for res in trials.results:
@@ -508,7 +432,7 @@ class ModelSelection:
             self.results_excel = pd.DataFrame(excel_results,
                                               columns=['accuracy', 'model', 'model_name', 'model_memory',
                                                        'prediction_time', 'train_time'])
-            # TODO add some duplicate filtering
+            # TODO: add some duplicate filtering
             #self.results_excel.drop_duplicates(subset=['accuracy','model'], inplace=True)
 
             # save to results trials with only ok status
@@ -519,10 +443,7 @@ class ModelSelection:
                                     res['prediction_time'], res['train_time']))
 
             self.optimal_results = results
-
-            self.trials = trials  # can be moved up or down, I guess
-
-            # n_optimal = len(self.optimal_results)
+            self.trials = trials
 
             # func for sort self.optimal_results
             def sortSecond(val):
@@ -601,7 +522,6 @@ class ModelSelection:
                 self.results_excel = pd.DataFrame(excel_results,
                                                   columns=['accuracy', 'model', 'model_name', 'model_memory',
                                                            'prediction_time', 'train_time'])
-                # TODO you probably need to check requirements for ensembling models
 
     def save_results(self, n_best='All', save_excel=True, save_config=True):
         def save_model(to_persist, name):
@@ -621,7 +541,6 @@ class ModelSelection:
         if os.path.exists(path) == False:
             os.mkdir(path)
 
-        # TODO probably need rework. Looks not optimal.
         if n_best == "All":
             for i in range(len(self.optimal_results)):
                 model = self.optimal_results[i][1]
@@ -630,7 +549,7 @@ class ModelSelection:
         else:
             if isinstance(n_best, int):
                 model_num = n_best
-            elif n_best == None:  # TODO NEW, need test
+            elif n_best == None:
                 model_num = None
             elif n_best == "The best":
                 model_num = 1
@@ -646,7 +565,6 @@ class ModelSelection:
             if model_num != None:
                 if len(self.optimal_results) < model_num:
                     model_num = len(self.optimal_results)
-
                 for i in range(model_num):
                     model = self.optimal_results[i][1]
                     name = str(i + 1) + '_' + str(self.optimal_results[i][2]) + '_' + str(self.optimal_results[i][0])
@@ -675,9 +593,5 @@ class ModelSelection:
             cfg['search_options']['saved_top_models_amount'] = n_best
             cfg['paths']['DS_abs_path'] = None
             cfg['paths']['CD_abs_path'] = None
-
             config.save_config(cfg, self.experiment_name + '\\config.json')
-
             joblib.dump(self.trials, self.experiment_name + '\\hyperopt_trials.pkl')
-
-# ['accuracy']['model']['model_name']['model_memory']['prediction_time']['train_time']

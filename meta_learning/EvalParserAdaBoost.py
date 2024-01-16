@@ -1,12 +1,11 @@
-import numpy as np
 import pandas as pd
 from os import listdir
 from os.path import isfile, join
 import warnings
-
 from AutoML.meta_learning.util.utils import get_nearest_dids, clear_strings_in_dict
 
 warnings.simplefilter(action='ignore', category=FutureWarning)
+# TODO: remove absolute paths from the project
 
 
 def get_optimal_hyperparameters_adaboost(closest_dids, n=1, p_type='automl', verbose=True):
@@ -91,19 +90,6 @@ def get_params_adaboost(did, tid, num_results, p_type='automl', pipeline=True):
             df_params = df_params.drop_duplicates(subset=df_params.columns.difference(['function','value']))
             if df_params.shape[0] == num_results:
                 break
-
-    # TODO: less strict rules in case if df_params.shape[0] < num_results
-    # Pipeline processing was not implemented as the structure is inconsistent
-    # if (df_params.shape[0] < num_results) & (pipeline is True):
-    #     df_randomforest = df[
-    #         df['flow_name'].str.contains('AdaBoostClassifier', regex=False,case=False) &
-    #         df['flow_name'].str.contains('pipeline', regex=False,case=False)
-    #         ]
-    #     df_randomforest.reset_index(drop=True)
-    #     num_rows = df_randomforest.shape[0]
-    #
-    #     #################
-    #     df_params = df_randomforest[["function", "value", "parameters"]]
 
     return df_params
 
