@@ -24,10 +24,8 @@ used_algo = {
     'GaussianProcess': False,
     'GaussianNB': False,
     'Bagging(SVС)': False,
-
-    'LabelSpreading': False,  # 2+ 3+- (crushed at some point "n_neighbors <= n_samples")
-    'BernoulliNB': False,  # 2+ 3-
-
+    'LabelSpreading': False,
+    'BernoulliNB': False,
     'DBN': False,
     'FactorizationMachine': False,
     'PolynomialNetwork': False,

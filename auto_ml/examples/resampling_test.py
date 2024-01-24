@@ -24,14 +24,12 @@ used_algo = {
     'GaussianProcess': False,
     'GaussianNB': True,
     'Bagging(SVС)': False,
-
-    'LabelSpreading': False,  # 2+ 3+- (crushed at some point "n_neighbors <= n_samples")
-    'BernoulliNB': False,  # 2+ 3-
-
-    'DBN': False,  # --
-    'FactorizationMachine': False,  # --
-    'PolynomialNetwork': False,  # --
-    'ELM': False,  # --
+    'LabelSpreading': False,
+    'BernoulliNB': False,
+    'DBN': False,
+    'FactorizationMachine': False,
+    'PolynomialNetwork': False,
+    'ELM': False,
 }
 
 args_default = {

@@ -2,10 +2,8 @@
 experiments/
 
 auto_ml/__pycache__/
-
 auto_ml/utility/__pycache__/
 
 meta_learning/util/__pycache__/
-
 meta_learning/__pycache__/
-/meta_learning/unused/
+meta_learning/unused/

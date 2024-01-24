@@ -1,8 +1,3 @@
-"""
-from .ui to .py
-pyuic5 -o pyfilename.py design.ui
- -x executable  if __name__ == "__main__":
-"""
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import pyqtSlot, pyqtSignal, QThread
 from PyQt5.QtWidgets import QMainWindow, QFileDialog

@@ -27,10 +27,19 @@ More information [pdf](http://omega.sp.susu.ru/publications/bachelorthesis/2019_
 ___
 ### Special assignment
 During my studies at LUT, I extended the functionality of this project by adding:
-* A meta-learning approach that populates the hyperparameter space with the most promising hyperparameters..
+* A meta-learning algorithm based on a technique similar to Dataset2Vec. The algorithm populates the 
+hyperparameter space of [TPE](https://proceedings.neurips.cc/paper_files/paper/2011/file/86e8f7ab32cfd12577bc2619bc635690-Paper.pdf) 
+with the most promising hyperparameters. 
 * Ensemble learning algorithms, namely bagging and voting.
 * Imbalanced data handling algorithms that perform over-sampling and/or under-sampling.
 
-The new functionality is not present in the GUI and is only accessible through API calls. 
-Examples can be found [here](https://github.com/MainTechAI/AutoML/tree/master/auto_ml/examples).
+Training data for the meta-learning algorithm consists of 512 datasets obtained
+from [OpenML](https://www.openml.org/) project. Each dataset is described by 85 meta-features. 
 
+The new functionality is not present in the GUI. 
+You need to specify key word arguments of the class _ModelSelection_.
+Examples can be found [here](https://github.com/MainTechAI/AutoML/tree/master/auto_ml/examples).
+___
+TODO:
+* Add type hints
+* Add docstrings
